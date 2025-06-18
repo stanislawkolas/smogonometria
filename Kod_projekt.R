@@ -349,3 +349,34 @@ ggplot(data = mapa_dane) +
        fill = "Typ klastra") +
   theme_minimal()
 
+# Klasyczny model liniowy OLS
+model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
+                  Gm_tereny_zieleni +
+                  Grunty_lesne +
+                  Pow_powiatu +
+                  Ludność_na_km2 +
+                  Srednie_wyn +
+                  Drogi,
+                data = Dane)
+
+# Podsumowanie wyników
+summary(model_ols)
+
+# Spatial lag model (SAR)
+
+install.packages("spatialreg")
+library(spatialreg)
+
+model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
+                        Gm_tereny_zieleni +
+                        Grunty_lesne +
+                        Pow_powiatu +
+                        Ludność_na_km2 +
+                        Srednie_wyn +
+                        Drogi,
+                      data = mapa_dane, family = "SAR", listw = lw, method = "eigen", zero.policy = TRUE)
+
+# Podsumowanie wyników
+summary(model_sar)
+
+
