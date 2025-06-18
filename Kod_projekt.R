@@ -92,3 +92,26 @@ moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
            xlab = "Zanieczyszczenie powietrza", 
            ylab = "Spatial Lag of Income")
 
+local_moran <- localmoran(Dane$Wskaznik, lw)
+
+Dane$Ii <- local_moran[, 1]
+Dane$P.Ii <- local_moran[, 5]
+print(Dane)
+
+
+model_stat <- lm(
+  Wskaznik ~ Liczba_pojazdów +
+    Gm_tereny_zieleni +
+    Grunty_lesne +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Srednie_wyn +
+    Drogi,
+  data = Dane)
+
+summary(model_stat)
+
+
+model_best_stat <- step(model_stat, direction = "backward")
+
+summary(model_best_stat)
