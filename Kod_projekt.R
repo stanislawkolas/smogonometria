@@ -1,18 +1,18 @@
 #pakiety do instalacji
 install.packages("ggplot2")
-library(ggplot2)
 install.packages("dplyr")
-library(dplyr)
 install.packages("tidyverse")
+install.packages("corrplot")
+install.packages("sf")
+install.packages("spatialreg")
+install.packages("spdep")
+library(ggplot2)
+library(dplyr)
 library(tidyverse)
 library(readr)
-install.packages("corrplot")
 library(corrplot)
-install.packages("sf")
 library(sf)
-install.packages("spatialreg")
 library(spatialreg)
-install.packages("spdep")
 library(spdep)
 
 
@@ -22,6 +22,9 @@ View(Dane)
 Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
 #zmiana nazw kolumn
 colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów","Gm_tereny_zieleni","Grunty_lesne","Pow_powiatu","Ludność_na_km2","Srednie_wyn","Drogi")
+
+#Sortowanie danych według kodu powaiatu rosnąco
+Dane <- Dane[order(Dane$Kod_powiat), ]
 
 #Histogram zanieczyszczenia powietrza w 2023 roku
 ggplot(Dane, aes(x = `Wskaznik`)) + 
@@ -51,6 +54,8 @@ corrplot(corr_matrix, method = "color", addCoef.col = "black")  # Wizualizacja
 ##Mapa
 mapa <- st_read("counties.shp")  # Plik .shp z granicami powiatów
 colnames(mapa)  # Sprawdzenie jakie nagłówki ma plik mapa
+#Sortowanie danych według kodu powaiatu rosnąco
+mapa <- mapa[order(mapa$JPT_KOD_JE), ]
 #połaczenie danych z mapą
 mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
 
@@ -82,5 +87,8 @@ all.equal(mapa$JPT_KOD_JE, Dane$Kod_powiat)
 
 # Moran I test
 moran.test(Dane$Wskaznik, lw)
-
+#Moran Plot
+moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
+           xlab = "Zanieczyszczenie powietrza", 
+           ylab = "Spatial Lag of Income")
 
