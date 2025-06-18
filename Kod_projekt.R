@@ -7,6 +7,12 @@ install.packages("sf")
 install.packages("spatialreg")
 install.packages("spdep")
 install.packages("standardize")
+install.packages("e1071")
+install.packages("naniar")
+library(naniar)
+library(ggplot2)
+library(dplyr)
+library(e1071)
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
@@ -17,124 +23,29 @@ library(spatialreg)
 library(spdep)
 library(naniar)
 library(standardize)
-
-
+#wczytanie danych
 Dane <- read_csv("Dane_zanieczyszczenie.csv")
 View(Dane)
 #zamiana kolumn na numeric oprócz Kod_powiat
 Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
 #zmiana nazw kolumn
 colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów","Gm_tereny_zieleni","Grunty_lesne","Pow_powiatu","Ludność_na_km2","Srednie_wyn","Drogi")
-
 #Sortowanie danych według kodu powaiatu rosnąco
 Dane <- Dane[order(Dane$Kod_powiat), ]
 
-#Histogram zanieczyszczenia powietrza w 2023 roku
-ggplot(Dane, aes(x = `Wskaznik`)) + 
-  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) + 
-  labs(title = "Rozkład zanieczyszczenia powietrza w 2023 roku", 
-       x = "Wskażnik zanieczyszczenia powietrza", 
-       y = "Liczba powiatów") +
-  theme_minimal()
+colnames(mapa)    # sprawdzenie nazw kolumn w pliku .shp 
+print(mapa$JPT_KOD_JE)   # sprawdzenie kolejności obiektów w pliku .shp
+all.equal(mapa$JPT_KOD_JE, Dane$Kod_powiat)
+nb <- poly2nb(mapa)  # Neighbors list
+lw <- nb2listw(nb, style = "W", zero.policy=TRUE)
 
-##KORELACJA
-
-# Wybierz tylko kolumny numeryczne
-num_cols <- sapply(Dane, is.numeric)
-
-# Nazwy kolumn, które chcesz wykluczyć
-kolumny_do_pominiecia <- c("Kod_powiat", "Wskaznik","Ludność_na_km2")
-
-# Usuń te kolumny z listy numerycznych
-num_cols[names(num_cols) %in% kolumny_do_pominiecia] <- FALSE
-
-# Oblicz macierz korelacji
-corr_matrix <- cor(Dane[, num_cols])
-
-# Obliczenie korelacji
-corrplot(corr_matrix, method = "color", addCoef.col = "black")  # Wizualizacja
-
-##Mapa
+#Mapa
 mapa <- st_read("counties.shp")  # Plik .shp z granicami powiatów
 colnames(mapa)  # Sprawdzenie jakie nagłówki ma plik mapa
 #Sortowanie danych według kodu powaiatu rosnąco
 mapa <- mapa[order(mapa$JPT_KOD_JE), ]
 #połaczenie danych z mapą
 mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
-
-#Kartogram zmiennej objaśnianej
-ggplot(data = mapa_dane) + 
-  geom_sf(aes(fill = Wskaznik)) +
-  scale_fill_gradient(low = "White", high = "red") +
-  labs(title = "Wskaznik zanieczyszczenia powietrza w Polsce") +
-  theme_minimal()
-#Kartogram Dróg
-ggplot(data = mapa_dane) + 
-  geom_sf(aes(fill = Drogi)) +
-  scale_fill_gradient(low = "White", high = "blue") +
-  labs(title = "Długość dróg utwardzonych w kilometrach w podziale na powiaty") +
-  theme_minimal()
-#Kartogram Gruntów leśnych
-ggplot(data = mapa_dane) + 
-  geom_sf(aes(fill = Grunty_lesne)) +
-  scale_fill_gradient(low = "White", high = "green") +
-  labs(title = "Powierzchnia gruntów leśnych w hektarach w podziale na powiaty") +
-  theme_minimal()
-
-nb <- poly2nb(mapa)  # Neighbors list
-lw <- nb2listw(nb, style = "W", zero.policy=TRUE)
-
-colnames(mapa)    # sprawdzenie nazw kolumn w pliku .shp 
-print(mapa$JPT_KOD_JE)   # sprawdzenie kolejności obiektów w pliku .shp
-all.equal(mapa$JPT_KOD_JE, Dane$Kod_powiat)
-
-# Moran I test
-moran.test(Dane$Wskaznik, lw)
-#Moran Plot
-moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
-           xlab = "Zanieczyszczenie powietrza", 
-           ylab = "Spatial Lag of Income")
-
-local_moran <- localmoran(Dane$Wskaznik, lw)
-
-Dane$Ii <- local_moran[, 1]
-Dane$P.Ii <- local_moran[, 5]
-print(Dane)
-
-
-model_stat <- lm(
-  Wskaznik ~ Liczba_pojazdów +
-    Gm_tereny_zieleni +
-    Grunty_lesne +
-    Pow_powiatu +
-    Ludność_na_km2 +
-    Srednie_wyn +
-    Drogi,
-  data = Dane)
-
-summary(model_stat)
-
-
-model_best_stat <- step(model_stat, direction = "backward")
-
-summary(model_best_stat)
-
-##====================Tutaj zaczynam szpącić==================================
-
-#Identyfikacja braków danych i obserwacji odstających
-
-# Wczytanie niezbędnych pakietów
-install.packages("naniar")
-install.packages("ggplot2")
-install.packages("dplyr")
-
-library(naniar)
-library(ggplot2)
-library(dplyr)
-
-# Wczytanie danych (jeśli nie wczytane)
-Dane <- readr::read_csv("Dane_zanieczyszczenie.csv")
-Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
 
 # ---- IDENTYFIKACJA BRAKÓW DANYCH ----
 
@@ -170,7 +81,6 @@ for (colname in names(Dane_num)) {
 
 # Wykrycie obserwacji odstających za pomocą reguły IQR
 outliers_list <- list()
-
 for (col in names(Dane_num)) {
   q1 <- quantile(Dane[[col]], 0.25, na.rm = TRUE)
   q3 <- quantile(Dane[[col]], 0.75, na.rm = TRUE)
@@ -185,11 +95,6 @@ print("Indeksy obserwacji odstających w poszczególnych zmiennych:")
 print(outliers_list)
 
 ##Obliczenie podstawowych statystyk opisowych (m.in. średnia, mediana, min, max, odchylenie standardowe, współczynniki asymetrii)
-
-# Wymagane pakiety
-install.packages("e1071")  # do obliczania współczynnika asymetrii
-library(dplyr)
-library(e1071)
 
 # Wybór kolumn numerycznych
 Dane_num <- Dane %>% select(where(is.numeric))
@@ -211,12 +116,8 @@ statystyki[ , -1] <- round(statystyki[ , -1], 2)
 # Wyświetlenie tabeli
 print(statystyki[ , -1])
 
-##Analiza korelacji między zmiennymi ilościowymi
-
-# Wymagane pakiety
-install.packages("corrplot")
-library(dplyr)
-library(corrplot)
+##KORELACJA
+##Analiza korelacji między zmiennymi ilościowymi (wszystkimi)
 
 # Wybór kolumn numerycznych
 Dane_num <- Dane %>% select(where(is.numeric))
@@ -233,25 +134,25 @@ corrplot(macierz_korelacji, method = "color", addCoef.col = "black",
          title = "Macierz korelacji zmiennych ilościowych", 
          mar = c(0, 0, 1, 0))
 
+# Analiza korelacji między zmiennymi ilościowymi (po dopasowaniu)
+
+# Wybierz tylko kolumny numeryczne
+num_cols <- sapply(Dane, is.numeric)
+
+# Nazwy kolumn, które chcesz wykluczyć
+kolumny_do_pominiecia <- c("Kod_powiat", "Wskaznik","Ludność_na_km2") #Korelacja tych zmeinnych była zbyt wysoka
+
+# Usuń te kolumny z listy numerycznych
+num_cols[names(num_cols) %in% kolumny_do_pominiecia] <- FALSE
+
+# Oblicz macierz korelacji
+corr_matrix <- cor(Dane[, num_cols])
+
+# Obliczenie korelacji
+corrplot(corr_matrix, method = "color", addCoef.col = "black")  # Wizualizacja
+
+#--------------Wykresy---------------------
 ##Wykresy: histogramy, wykresy rozrzutu, gęstości
-
-# Załaduj potrzebne biblioteki
-library(ggplot2)
-library(dplyr)
-
-# Załaduj dane – zmień ścieżkę jeśli potrzebujesz
-Dane <- readr::read_csv("Dane_zanieczyszczenie.csv")
-
-# Zamień kolumny na numeryczne (oprócz Kod_powiat)
-Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
-
-# Zmień nazwy kolumn jeśli trzeba
-colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów",
-                    "Gm_tereny_zieleni", "Grunty_lesne", "Pow_powiatu",
-                    "Ludność_na_km2", "Srednie_wyn", "Drogi")
-
-# Posortuj po Kod_powiat
-Dane <- Dane[order(Dane$Kod_powiat), ]
 
 # 1. HISTOGRAMY dla zmiennych numerycznych
 # Tylko kolumny numeryczne
@@ -295,25 +196,43 @@ for (zm in zmienne_x) {
   )
 }
 
+#Kartogram zmiennej objaśnianej
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Wskaznik)) +
+  scale_fill_gradient(low = "White", high = "red") +
+  labs(title = "Wskaznik zanieczyszczenia powietrza w Polsce") +
+  theme_minimal()
+#Kartogram Dróg
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Drogi)) +
+  scale_fill_gradient(low = "White", high = "blue") +
+  labs(title = "Długość dróg utwardzonych w kilometrach w podziale na powiaty") +
+  theme_minimal()
+#Kartogram Gruntów leśnych
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Grunty_lesne)) +
+  scale_fill_gradient(low = "White", high = "green") +
+  labs(title = "Powierzchnia gruntów leśnych w hektarach w podziale na powiaty") +
+  theme_minimal()
+
+#Histogram zanieczyszczenia powietrza w 2023 roku
+ggplot(Dane, aes(x = `Wskaznik`)) + 
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) + 
+  labs(title = "Rozkład zanieczyszczenia powietrza w 2023 roku", 
+       x = "Wskażnik zanieczyszczenia powietrza", 
+       y = "Liczba powiatów") +
+  theme_minimal()
+
+#----------------ESDA------------------
 ##Identyfikacja przestrzennych skupisk i obserwacji odstających (hot/cold spots)
+# Moran I test
+moran.test(Dane$Wskaznik, lw)
+#Moran Plot
+moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
+           xlab = "Zanieczyszczenie powietrza", 
+           ylab = "Spatial Lag of Income")
 
-# Wymagane biblioteki
-library(spdep)
-library(sf)
-library(ggplot2)
-library(dplyr)
-
-#Mapa
-mapa <- st_read("counties.shp")  # Plik .shp z granicami powiatów
-colnames(mapa)  # Sprawdzenie jakie nagłówki ma plik mapa
-#Sortowanie danych według kodu powaiatu rosnąco
-mapa <- mapa[order(mapa$JPT_KOD_JE), ]
-#połaczenie danych z mapą
-mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
-
-# Tworzenie listy sąsiedztwa i wag
-nb <- poly2nb(mapa)  # Neighbors list
-lw <- nb2listw(nb, style = "W", zero.policy=TRUE)
+local_moran <- localmoran(Dane$Wskaznik, lw)
 
 # Obliczenie lokalnych statystyk Morana
 local_moran <- localmoran(mapa_dane$Wskaznik, lw, zero.policy = TRUE)
@@ -350,16 +269,34 @@ ggplot(data = mapa_dane) +
   labs(title = "Lokalna autokorelacja przestrzenna (LISA)",
        fill = "Typ klastra") +
   theme_minimal()
+
+#Pomocniczy model liniowy
+model_stat <- lm(
+  Wskaznik ~ Liczba_pojazdów +
+    Gm_tereny_zieleni +
+    Grunty_lesne +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Srednie_wyn +
+    Drogi,
+  data = Dane)
+
+summary(model_stat)
+
+model_best_stat <- step(model_stat, direction = "backward")
+
+summary(model_best_stat)
+
 #standaryzowanie danych
 Dane_std <- Dane %>% mutate(across(where(is.numeric), scale))
 print(Dane_std)
 
-
+# Połączenie danych z mapą
 mapa_dane_std <- mapa %>%
   left_join(Dane_std, by = c("JPT_KOD_JE" = "Kod_powiat"))
 
 
-
+##Modelowanie ekonometryczne i ocena modelu
 # Klasyczny model liniowy OLS
 model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
                   Gm_tereny_zieleni +
@@ -370,14 +307,13 @@ model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
                   Drogi,
                 data = Dane_std)
 
+res_squared <- residuals(model_ols)^2
+moran.test(res_squared, lw)
+
 # Podsumowanie wyników
 summary(model_ols)
 
 # Spatial lag model (SAR)
-
-install.packages("spatialreg")
-library(spatialreg)
-
 #Model SAR
 model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
                         Gm_tereny_zieleni +
@@ -392,8 +328,8 @@ model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
 summary(model_sar)
 
 
-res_squared <- residuals(model_sar)^2
-moran.test(res_squared, lw)
+res_squared1 <- residuals(model_sar)^2
+moran.test(res_squared1, lw)
 
 #Model SEM
 sem_model <- spautolm(
@@ -405,8 +341,8 @@ sem_model <- spautolm(
 summary(sem_model)
 
 
-res_squared <- residuals(sem_model)^2
-moran.test(res_squared, lw)
+res_squared2 <- residuals(sem_model)^2
+moran.test(res_squared2, lw)
 
 
 #Przestrzenny Model Durbina (SDM)
@@ -422,8 +358,8 @@ sdm_model <- lagsarlm(
 
 summary(sdm_model)
 
-res_squared <- residuals(sdm_model)^2
-moran.test(res_squared, lw)
+res_squared3 <- residuals(sdm_model)^2
+moran.test(res_squared3, lw)
 
 
 # Model SLX (Spatial Lag of X)
@@ -438,5 +374,5 @@ slx_model <- lmSLX(
 
 summary(slx_model)
 
-res_squared <- residuals(slx_model)^2
-moran.test(res_squared, lw)
+res_squared4 <- residuals(slx_model)^2
+moran.test(res_squared4, lw)
