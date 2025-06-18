@@ -6,6 +6,7 @@ install.packages("corrplot")
 install.packages("sf")
 install.packages("spatialreg")
 install.packages("spdep")
+install.packages("standardize")
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
@@ -15,6 +16,7 @@ library(sf)
 library(spatialreg)
 library(spdep)
 library(naniar)
+library(standardize)
 
 
 Dane <- read_csv("Dane_zanieczyszczenie.csv")
@@ -348,6 +350,15 @@ ggplot(data = mapa_dane) +
   labs(title = "Lokalna autokorelacja przestrzenna (LISA)",
        fill = "Typ klastra") +
   theme_minimal()
+#standaryzowanie danych
+Dane_std <- Dane %>% mutate(across(where(is.numeric), scale))
+print(Dane_std)
+
+
+mapa_dane_std <- mapa %>%
+  left_join(Dane_std, by = c("JPT_KOD_JE" = "Kod_powiat"))
+
+
 
 # Klasyczny model liniowy OLS
 model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
@@ -357,7 +368,7 @@ model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
                   Ludność_na_km2 +
                   Srednie_wyn +
                   Drogi,
-                data = Dane)
+                data = Dane_std)
 
 # Podsumowanie wyników
 summary(model_ols)
@@ -367,6 +378,7 @@ summary(model_ols)
 install.packages("spatialreg")
 library(spatialreg)
 
+#Model SAR
 model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
                         Gm_tereny_zieleni +
                         Grunty_lesne +
@@ -374,9 +386,57 @@ model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
                         Ludność_na_km2 +
                         Srednie_wyn +
                         Drogi,
-                      data = mapa_dane, family = "SAR", listw = lw, method = "eigen", zero.policy = TRUE)
+                      data = mapa_dane_std,listw = lw, method = "eigen", zero.policy = TRUE)
 
 # Podsumowanie wyników
 summary(model_sar)
 
 
+res_squared <- residuals(model_sar)^2
+moran.test(res_squared, lw)
+
+#Model SEM
+sem_model <- spautolm(
+  formula = Wskaznik ~ Liczba_pojazdów + Pow_powiatu + Ludność_na_km2 + Drogi,
+  data = Dane_std,
+  listw = lw,  # lub "b" w nowszych wersjach
+  method = "eigen"
+)
+summary(sem_model)
+
+
+res_squared <- residuals(sem_model)^2
+moran.test(res_squared, lw)
+
+
+#Przestrzenny Model Durbina (SDM)
+sdm_model <- lagsarlm(
+  formula = Wskaznik ~ Liczba_pojazdów +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Drogi,
+    data = Dane_std,
+  listw = lw,
+  Durbin = TRUE
+)
+
+summary(sdm_model)
+
+res_squared <- residuals(sdm_model)^2
+moran.test(res_squared, lw)
+
+
+# Model SLX (Spatial Lag of X)
+slx_model <- lmSLX(
+  formula = Wskaznik ~ Liczba_pojazdów +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Drogi,
+  data = Dane_std,
+  listw = lw
+)
+
+summary(slx_model)
+
+res_squared <- residuals(slx_model)^2
+moran.test(res_squared, lw)
