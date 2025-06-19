@@ -1,0 +1,594 @@
+---
+title: "Analiza zanieczyszczenia powietrza w Polsce"
+author: "Twoje Imię"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: leonids
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+# Instalacja i ładowanie pakietów
+
+```{r}
+packages <- c("ggplot2", "dplyr", "tidyverse", "readr", "corrplot", "sf",
+              "spatialreg", "spdep", "naniar", "e1071", "standardize", "prettydoc")
+
+for (pkg in packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg)
+    library(pkg, character.only = TRUE)
+  } else {
+    library(pkg, character.only = TRUE)
+  }
+}
+
+library(naniar)
+library(ggplot2)
+library(dplyr)
+library(e1071)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(corrplot)
+library(sf)
+library(spatialreg)
+library(spdep)
+library(naniar)
+library(standardize)
+library(prettydoc)
+```
+
+# Wstęp
+
+W niniejszym raporcie przedstawiono analizę zanieczyszczenia powietrza w Polsce z wykorzystaniem danych przestrzennych oraz narzędzi statystycznych w języku R.
+
+# Przygotowanie danych
+
+```{r}
+Dane <- read_csv("Dane_zanieczyszczenie.csv")
+View(Dane)
+```
+
+## Wczytanie danych i ich przygotowanie
+
+```{r mapa, message=FALSE, warning=FALSE}
+if (file.exists("counties.shp")) {
+  mapa <- st_read("counties.shp")
+  mapa <- mapa[order(mapa$JPT_KOD_JE), ]
+  mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
+} else {
+  stop("Plik counties.shp nie został znaleziony w katalogu roboczym.")
+}
+
+#zamiana kolumn na numeric oprócz Kod_powiat
+Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
+#zmiana nazw kolumn
+colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów","Gm_tereny_zieleni","Grunty_lesne","Pow_powiatu","Ludność_na_km2","Srednie_wyn","Drogi")
+#Sortowanie danych według kodu powaiatu rosnąco
+Dane <- Dane[order(Dane$Kod_powiat), ]
+
+colnames(mapa)    # sprawdzenie nazw kolumn w pliku .shp 
+print(mapa$JPT_KOD_JE)   # sprawdzenie kolejności obiektów w pliku .shp
+all.equal(mapa$JPT_KOD_JE, Dane$Kod_powiat)
+nb <- poly2nb(mapa)  # Neighbors list
+lw <- nb2listw(nb, style = "W", zero.policy=TRUE)
+```
+
+Analiza rozpoczęła się od wczytania zbioru danych zawierającego wskaźnik zanieczyszczenia powietrza oraz zmienne potencjalnie go tłumaczące, takie jak liczba pojazdów, udział terenów zieleni i lasów, powierzchnia powiatu, gęstość zaludnienia, średnie wynagrodzenie oraz długość dróg. Dane zostały przekształcone w postać numeryczną i posortowane według kodów powiatów, co umożliwiło dalszą analizę statystyczną i przestrzenną.
+
+# Identyfikacja braków danych
+
+```{r}
+
+# Podsumowanie braków danych
+summary_na <- sapply(Dane, function(x) sum(is.na(x)))
+print("Liczba braków danych w każdej kolumnie:")
+print(summary_na)
+
+# Procent braków danych
+percent_na <- sapply(Dane, function(x) mean(is.na(x))) * 100
+print("Procent braków danych:")
+print(percent_na)
+
+# Wizualizacja braków danych
+vis_miss(Dane) + 
+  labs(title = "Wizualizacja braków danych")
+
+```
+
+Analiza kompletności danych wykazała, że wszystkie zmienne zawarte w zbiorze są w pełni uzupełnione – nie występują żadne wartości brakujące. Zarówno ilościowe podsumowanie braków, jak i wizualizacja za pomocą funkcji vis_miss() potwierdzają 100% obecność danych we wszystkich kolumnach. Dzięki temu dane nie wymagają dodatkowego przygotowania w postaci imputacji czy usuwania obserwacji, co wzmacnia rzetelność dalszych analiz statystycznych i przestrzennych.
+
+## Identyfikacja obserwacji odstających (OUTLIERS)
+
+```{r echo=FALSE}
+# Wykresy boxplot dla każdej kolumny numerycznej
+Dane_num <- Dane %>% 
+  select(where(is.numeric)) 
+
+# Rysuj boxploty automatycznie
+for (colname in names(Dane_num)) {
+  print(
+    ggplot(Dane, aes_string(x = "1", y = colname)) +
+      geom_boxplot(fill = "orange", outlier.color = "red", outlier.shape = 8) +
+      labs(title = paste("Boxplot -", colname), y = colname, x = "") +
+      theme_minimal()
+  )
+}
+
+# Wykrycie obserwacji odstających za pomocą reguły IQR
+outliers_list <- list()
+for (col in names(Dane_num)) {
+  q1 <- quantile(Dane[[col]], 0.25, na.rm = TRUE)
+  q3 <- quantile(Dane[[col]], 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lower <- q1 - 1.5 * iqr
+  upper <- q3 + 1.5 * iqr
+  outliers <- which(Dane[[col]] < lower | Dane[[col]] > upper)
+  outliers_list[[col]] <- outliers
+}
+
+print("Indeksy obserwacji odstających w poszczególnych zmiennych:")
+print(outliers_list)
+```
+
+Na podstawie analizy zmiennych ilościowych za pomocą reguły IQR (interquartile range) zidentyfikowano obserwacje odstające w każdej z badanych zmiennych. W szczególności: Wskaźnik zanieczyszczenia wykazuje 16 wartości odstających, co może wskazywać na powiaty o skrajnie wysokim poziomie zanieczyszczenia, np. ze względu na działalność przemysłową. Liczba pojazdów oraz długość dróg to zmienne infrastrukturalne, w których odchylenia sugerują silną koncentrację transportu w wybranych lokalizacjach. Gęstość zaludnienia i średnie wynagrodzenie również charakteryzują się wieloma odchyleniami, co wskazuje na wyraźne różnice społeczno-ekonomiczne między powiatami. Duża liczba obserwacji odstających w zmiennych środowiskowych, takich jak tereny zieleni i grunty leśne, może wynikać z naturalnych różnic w pokryciu terenu (np. obszary miejskie vs. górskie i leśne). Obserwacje te nie muszą być błędami, lecz mogą wskazywać na istotne przypadki szczególne (np. powiaty o specyficznym charakterze). Zamiast je usuwać, warto rozważyć dalszą eksplorację tych jednostek terytorialnych jako potencjalnych klastrów analizy lub przypadków do pogłębionej interpretacji jakościowej.
+
+# Statystyki opisowe
+
+```{r}
+# Wybór kolumn numerycznych
+Dane_num <- Dane %>% select(where(is.numeric))
+
+# Obliczanie statystyk opisowych
+statystyki <- data.frame(
+  Zmienna = names(Dane_num),
+  Srednia = sapply(Dane_num, mean, na.rm = TRUE),
+  Mediana = sapply(Dane_num, median, na.rm = TRUE),
+  Minimum = sapply(Dane_num, min, na.rm = TRUE),
+  Maksimum = sapply(Dane_num, max, na.rm = TRUE),
+  Odchylenie_std = sapply(Dane_num, sd, na.rm = TRUE),
+  Asymetria = sapply(Dane_num, skewness, na.rm = TRUE)
+)
+
+# Zaokrągl tylko kolumny numeryczne (bez kolumny "Zmienna")
+statystyki[ , -1] <- round(statystyki[ , -1], 2)
+
+# Wyświetlenie tabeli
+print(statystyki[ , -1])
+```
+
+Dane opisowe dla ośmiu zmiennych ilościowych wskazują na wyraźne zróżnicowanie rozkładów:
+
+-   Wskaźnik zanieczyszczenia ma średnią wartość 53,13, a asymetria dodatnia (1,34) wskazuje na obecność kilku wysokich wartości, które podciągają średnią ponad medianę (50,93).
+
+-   Liczba pojazdów charakteryzuje się bardzo dużym rozrzutem (od 21 125 do 1 874 318) oraz ekstremalną asymetrią dodatnią (10,22), co oznacza, że kilka powiatów znacznie odbiega od reszty (najpewniej miasta na prawach powiatu).
+
+-   Tereny zieleni i grunty leśne również wykazują asymetrię (odpowiednio 3,40 i 2,20), co sugeruje, że większość powiatów ma niewielkie powierzchnie tych terenów, a tylko kilka cechuje się bardzo dużymi wartościami.
+
+-   Powierzchnia powiatu ma największe zróżnicowanie (od 1330 do prawie 300 000 ha), ale asymetria (0,69) wskazuje na bardziej zrównoważony rozkład.
+
+-   Ludność na km² i średnie wynagrodzenie również są dodatnio asymetryczne, co sugeruje, że większość powiatów jest rzadziej zaludniona i mniej zamożna, a wyższe wartości występują tylko lokalnie (duże miasta).
+
+-   Długość dróg również cechuje się pozytywną asymetrią (1,99), co może wynikać z koncentracji infrastruktury w niektórych regionach.
+
+Podsumowując, większość zmiennych wykazuje silną asymetrię prawostronną oraz duże zróżnicowanie, co należy uwzględnić przy doborze metod statystycznych oraz interpretacji wyników regresji czy analiz przestrzennych.
+
+# Analiza korelacji
+
+```{r}
+##Analiza korelacji między zmiennymi ilościowymi (wszystkimi)
+
+# Wybór kolumn numerycznych
+Dane_num <- Dane %>% select(where(is.numeric))
+
+# Obliczanie macierzy korelacji (domyślnie metoda Pearsona)
+macierz_korelacji <- cor(Dane_num, use = "complete.obs")
+
+# Wyświetlenie macierzy korelacji
+print(round(macierz_korelacji, 2))
+
+# Wizualizacja korelacji
+corrplot(macierz_korelacji, method = "color", addCoef.col = "black", 
+         tl.cex = 0.8, number.cex = 0.7,
+         title = "Macierz korelacji zmiennych ilościowych", 
+         mar = c(0, 0, 1, 0))
+
+# Analiza korelacji między zmiennymi ilościowymi (po dopasowaniu)
+
+# Wybierz tylko kolumny numeryczne
+num_cols <- sapply(Dane, is.numeric)
+
+# Nazwy kolumn, które chcesz wykluczyć
+kolumny_do_pominiecia <- c("Kod_powiat", "Wskaznik","Ludność_na_km2") #Korelacja tych zmeinnych była zbyt wysoka
+
+# Usuń te kolumny z listy numerycznych
+num_cols[names(num_cols) %in% kolumny_do_pominiecia] <- FALSE
+
+# Oblicz macierz korelacji
+corr_matrix <- cor(Dane[, num_cols])
+
+# Obliczenie korelacji
+corrplot(corr_matrix, method = "color", addCoef.col = "black")  # Wizualizacja
+```
+
+Wskaźnik zanieczyszczenia powietrza dodatnio koreluje z liczbą pojazdów (r = 0.26) i gęstością zaludnienia (r = 0.63), co potwierdza wpływ urbanizacji i transportu na jakość powietrza. Ujemne korelacje z powierzchnią powiatu (r = -0.53) i terenami zieleni sugerują, że większe i bardziej zielone obszary mają niższe zanieczyszczenie. Zmienna **ludność na km²** została wykluczona z modelowania z uwagi na silne powiązania z innymi zmiennymi, co mogłoby powodować problem współliniowości (multikolinearności). Silne powiązania między zmiennymi objaśniającymi (np. powierzchnia i grunty leśne, drogi i pojazdy) wskazują na możliwą współliniowość, dlatego część zmiennych należy ostrożnie dobierać do modeli regresyjnych.
+
+# Wizualizacja danych
+
+## Histogramy tylko dla zmiennych ilościowych
+
+```{r}
+Dane_num <- Dane %>% select(where(is.numeric))
+# Histogramy tylko dla zmiennych ilościowych
+for (zm in names(Dane_num)) {
+  print(
+    ggplot(Dane, aes(x = .data[[zm]])) +
+      geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) +
+      labs(title = paste("Histogram -", zm),
+           x = zm, y = "Liczba powiatów") +
+      theme_minimal()
+  )
+}
+```
+
+Większość zmiennych wykazuje **silną asymetrię prawostronną**, co oznacza, że znaczna liczba powiatów ma niskie wartości, a tylko nieliczne – bardzo wysokie.
+
+-   **Wskaźnik zanieczyszczenia** ma rozkład lekko skośny, z większością wartości między 45 a 60. Rozkład ten jest umiarkowanie symetryczny z kilkoma wartościami odstającymi.
+
+-   **Tereny zieleni (Gm_tereny_zieleni)** i **lasy (Grunty_lesne)** są skoncentrowane w nielicznych powiatach – większość z nich ma bardzo niskie wartości.
+
+-   **Powierzchnia powiatów**, **ludność na km²** i **długość dróg** pokazują bardzo rozciągnięte ogony – wskazuje to na obecność kilku dużych, silnie zurbanizowanych jednostek (np. miasta wojewódzkie).
+
+-   **Średnie wynagrodzenie** również ma rozkład niesymetryczny – większość wartości oscyluje wokół średniego poziomu, z pojedynczymi powiatami o bardzo wysokich płacach.
+
+-   
+
+## Wykresy gęstości dla zmiennych numerycznych
+
+```{r}
+for (zm in names(Dane_num)) {
+  print(
+    ggplot(Dane, aes_string(x = zm)) +
+      geom_density(fill = "skyblue", alpha = 0.6) +
+      labs(title = paste("Wykres gęstości -", zm),
+           x = zm, y = "Gęstość") +
+      theme_minimal()
+  )
+}
+```
+
+Rozkłady zmiennych ilościowych są w większości **asymetryczne prawostronnie**, co oznacza, że większość powiatów ma niskie wartości, a tylko nieliczne znacznie wyższe (np. liczba pojazdów, powierzchnia, długość dróg). Dotyczy to również zmiennych środowiskowych, jak **tereny zieleni** i **grunty leśne**, których większość powiatów posiada niewiele.
+
+Rozkład **wskaźnika zanieczyszczenia** jest bardziej zbliżony do normalnego, z lekką asymetrią. Tylko **średnie wynagrodzenie** prezentuje bardziej symetryczny i skupiony rozkład.
+
+Potwierdzenie podobnego kształtu przez histogramy i wykresy gęstości wzmacnia wiarygodność obserwacji dotyczących asymetrii i wartości odstających.
+
+## Wykresy Rozrzutu – relacja względem zmiennej Wskaznik
+
+```{r}
+#Lista zmiennych, które mogą wpływać na zanieczyszczenie
+zmienne_x <- c("Liczba_pojazdów", "Gm_tereny_zieleni", "Grunty_lesne", 
+               "Pow_powiatu", "Ludność_na_km2", "Srednie_wyn", "Drogi")
+
+for (zm in zmienne_x) {
+  print(
+    ggplot(Dane, aes_string(x = zm, y = "Wskaznik")) +
+      geom_point(color = "darkred", alpha = 0.6) +
+      geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +
+      labs(title = paste("Wskaznik zanieczyszczenia vs", zm),
+           x = zm, y = "Wskaznik zanieczyszczenia") +
+      theme_minimal()
+  )
+}
+```
+
+Z wykresów rozrzutu z linią trendu wynika, że:
+
+-   **Liczba pojazdów** i **gęstość zaludnienia** są dodatnio skorelowane ze wskaźnikiem zanieczyszczenia – im więcej ludzi i pojazdów, tym wyższy poziom zanieczyszczeń.
+
+-   **Grunty leśne** oraz **powierzchnia powiatu** wykazują ujemny związek – w większych i bardziej zielonych powiatach zanieczyszczenie jest niższe.
+
+-   Związek z **terenami zieleni** i **średnimi wynagrodzeniami** jest słabszy, ale również dodatni.
+
+-   **Długość dróg** pokazuje prawie płaski trend, co sugeruje słaby lub brak zależności z poziomem zanieczyszczenia.
+
+Widoczne rozproszenie punktów i obecność wartości odstających wskazują, że relacje te są istotne, ale niejednorodne – wymagają dalszego modelowania, np. regresji wielorakiej lub przestrzennej.
+
+## Kartogramy zmiennych objaśniających
+
+```{r}
+colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów",
+                    "Gm_tereny_zieleni", "Grunty_lesne", "Pow_powiatu",
+                    "Ludność_na_km2", "Srednie_wyn", "Drogi")
+
+# Upewnij się, że kod powiatu jest typu character
+Dane$Kod_powiat <- as.character(Dane$Kod_powiat)
+mapa$JPT_KOD_JE <- as.character(mapa$JPT_KOD_JE)
+
+# Połącz dane
+mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
+#Kartogram Dróg
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Drogi)) +
+  scale_fill_gradient(low = "White", high = "blue") +
+  labs(title = "Długość dróg utwardzonych w kilometrach w podziale na powiaty") +
+  theme_minimal()
+
+#Kartogram Gruntów leśnych
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Grunty_lesne)) +
+  scale_fill_gradient(low = "White", high = "green") +
+  labs(title = "Powierzchnia gruntów leśnych w hektarach w podziale na powiaty") +
+  theme_minimal()
+
+#Histogram zanieczyszczenia powietrza w 2023 roku
+ggplot(Dane, aes(x = Wskaznik)) + 
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) + 
+  labs(
+    title = "Rozkład zanieczyszczenia powietrza w 2023 roku", 
+    x = "Wskaźnik zanieczyszczenia powietrza", 
+    y = "Liczba powiatów"
+  ) +
+  theme_minimal()
+```
+
+## Histogram wskaźnika zanieczyszczenia
+
+```{r}
+ggplot(data = mapa_dane) + 
+  geom_sf(aes(fill = Wskaznik)) +
+  scale_fill_gradient(low = "White", high = "red") +
+  labs(title = "Wskaznik zanieczyszczenia powietrza w Polsce") +
+  theme_minimal()
+```
+
+### Kartogramy – interpretacja
+
+-   **Zanieczyszczenie powietrza** w 2023 roku ma zróżnicowane rozmieszczenie, z wyższymi wartościami w południowej Polsce – szczególnie na Śląsku, co może wynikać z gęstej zabudowy i przemysłu.
+
+-   **Długość dróg utwardzonych** również koncentruje się w regionach zurbanizowanych – największe wartości widoczne są w aglomeracji śląskiej oraz okolicach dużych miast.
+
+-   **Grunty leśne** dominują natomiast we wschodnich i południowo-wschodnich powiatach, gdzie przemysł i zaludnienie są mniejsze.
+
+Rozkłady te wskazują na potencjalną zależność między środowiskiem, infrastrukturą a zanieczyszczeniem – co potwierdzają wcześniejsze analizy korelacyjne i regresyjne.
+
+# Analiza przestrzenna
+
+```{r}
+##Identyfikacja przestrzennych skupisk i obserwacji odstających (hot/cold spots)
+# Moran I test
+moran.test(Dane$Wskaznik, lw)
+#Moran Plot
+moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
+           xlab = "Zanieczyszczenie powietrza", 
+           ylab = "Spatial Lag of Income")
+
+local_moran <- localmoran(Dane$Wskaznik, lw)
+
+# Obliczenie lokalnych statystyk Morana
+local_moran <- localmoran(mapa_dane$Wskaznik, lw, zero.policy = TRUE)
+
+# Dołączenie wyników do ramki danych
+mapa_dane$Ii <- local_moran[, 1]       # lokalny wskaźnik Morana
+mapa_dane$E.Ii <- local_moran[, 2]     # wartość oczekiwana
+mapa_dane$Var.Ii <- local_moran[, 3]   # wariancja
+mapa_dane$Z.Ii <- local_moran[, 4]     # statystyka Z
+mapa_dane$P.Ii <- local_moran[, 5]     # p-wartość
+
+# Klasyfikacja skupisk
+mapa_dane <- mapa_dane %>%
+  mutate(
+    klaster = case_when(
+      Z.Ii > 1.96 & Wskaznik > mean(Wskaznik, na.rm = TRUE) ~ "Hot Spot",
+      Z.Ii > 1.96 & Wskaznik < mean(Wskaznik, na.rm = TRUE) ~ "Cold Spot",
+      Z.Ii < -1.96                                           ~ "Outlier",
+      TRUE                                                   ~ "Brak istotności"
+    )
+  )
+
+# Zamiana na factor dla lepszej kolejności w legendzie
+mapa_dane$klaster <- factor(mapa_dane$klaster,
+                            levels = c("Hot Spot", "Cold Spot", "Outlier", "Brak istotności"))
+```
+
+Wartość statystyki Morana I wynosi **0.73** przy bardzo niskim poziomie istotności (*p* \< 2.2e-16), co jednoznacznie wskazuje na **silną i istotną przestrzenną autokorelację** wskaźnika zanieczyszczenia powietrza. Oznacza to, że powiaty o podobnym poziomie zanieczyszczenia tworzą przestrzenne klastry – sąsiadujące jednostki mają zbliżone wartości.
+
+Wykres Morana (scatterplot) potwierdza ten wynik: dane dobrze układają się wzdłuż rosnącej linii regresji, szczególnie w prawym górnym i lewym dolnym ćwiartku, co oznacza obecność **hot i cold spotów** – skupisk wysokich i niskich wartości.
+
+## Mapa klastrów (hot/cold spots)
+
+```{r}
+ggplot(data = mapa_dane) +
+  geom_sf(aes(fill = klaster)) +
+  scale_fill_manual(values = c("Hot Spot" = "red",
+                               "Cold Spot" = "blue",
+                               "Outlier" = "orange",
+                               "Brak istotności" = "grey90")) +
+  labs(title = "Lokalna autokorelacja przestrzenna (LISA)",
+       fill = "Typ klastra") +
+  theme_minimal()
+```
+
+Analiza lokalnej autokorelacji przestrzennej (LISA) ujawnia wyraźne **klastry zanieczyszczenia powietrza**:
+
+-   **Hot spoty** (na czerwono) zlokalizowane są głównie na południu Polski, w tym na Śląsku – obszarze o wysokim uprzemysłowieniu i gęstej zabudowie.
+
+-   **Cold spoty** (na niebiesko) występują głównie w północnej i północno-wschodniej Polsce, co wskazuje na większy udział terenów zielonych i niższą gęstość zaludnienia.
+
+-   Większość powiatów (na szaro) nie wykazuje istotnej lokalnej autokorelacji, co sugeruje zróżnicowanie wewnętrzne lub brak wyraźnych sąsiednich zależności.
+
+Mapa potwierdza istnienie przestrzennych wzorców zanieczyszczenia, które powinny być uwzględniane w politykach regionalnych.
+
+```{r}
+#Pomocniczy model liniowy
+model_stat <- lm(
+  Wskaznik ~ Liczba_pojazdów +
+    Gm_tereny_zieleni +
+    Grunty_lesne +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Srednie_wyn +
+    Drogi,
+  data = Dane)
+
+summary(model_stat)
+
+model_best_stat <- step(model_stat, direction = "backward")
+
+summary(model_best_stat)
+
+#standaryzowanie danych
+Dane_std <- Dane %>% mutate(across(where(is.numeric), scale))
+print(Dane_std)
+
+# Połączenie danych z mapą
+mapa_dane_std <- mapa %>%
+  left_join(Dane_std, by = c("JPT_KOD_JE" = "Kod_powiat"))
+```
+
+Oszacowany model regresji tłumaczy około 52% zmienności wskaźnika zanieczyszczenia, co wskazuje na umiarkowaną trafność wyjaśniającą. Istotny wpływ mają trzy zmienne: większa powierzchnia powiatu obniża poziom zanieczyszczenia, natomiast większa gęstość zaludnienia i długość dróg przyczyniają się do jego wzrostu. Pozostałe zmienne – takie jak liczba pojazdów, tereny zieleni czy wynagrodzenia – mimo że mają intuicyjny kierunek wpływu, nie są statystycznie istotne w tym modelu. Model dobrze nadaje się jako baza do dalszej analizy, w tym rozbudowy o komponent przestrzenny.
+
+# Modelowanie ekonometryczne i ocena modelu
+
+```{r}
+# Klasyczny model liniowy OLS
+model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
+                  Gm_tereny_zieleni +
+                  Grunty_lesne +
+                  Pow_powiatu +
+                  Ludność_na_km2 +
+                  Srednie_wyn +
+                  Drogi,
+                data = Dane_std)
+
+res_squared <- residuals(model_ols)^2
+moran.test(res_squared, lw)
+
+# Podsumowanie wyników
+summary(model_ols)
+
+# Spatial lag model (SAR)
+#Model SAR
+model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
+                        Gm_tereny_zieleni +
+                        Grunty_lesne +
+                        Pow_powiatu +
+                        Ludność_na_km2 +
+                        Srednie_wyn +
+                        Drogi,
+                      data = mapa_dane_std,listw = lw, method = "eigen", zero.policy = TRUE)
+
+# Podsumowanie wyników
+summary(model_sar)
+
+res_squared1 <- residuals(model_sar)^2
+moran.test(res_squared1, lw)
+```
+
+Początkowy model liniowy wykazywał dobrą dopasowalność (R² ≈ 0.52), jednak test Morana I dla reszt (I = 0.34, *p* \< 2.2e‑16) ujawnił **istotną przestrzenną autokorelację**, co oznacza, że klasyczna regresja niedoszacowuje wpływu zależności przestrzennych między powiatami. W odpowiedzi zastosowano przestrzenny model SAR (lagowy), który znacząco poprawił dopasowanie: wartość log-likelihood wzrosła, a AIC spadło z 818 do 336, co potwierdza wyższość modelu przestrzennego.
+
+W modelu SAR współczynnik rho wynoszący 0.80 (istotny statystycznie) wskazuje na silny przestrzenny efekt zależności między powiatami – poziom zanieczyszczenia w jednym powiecie jest silnie powiązany ze średnią w otoczeniu. Kluczowe zmienne, takie jak **gęstość zaludnienia** i **powierzchnia powiatu**, pozostały istotne, natomiast znaczenie innych predyktorów (np. liczby pojazdów, dróg) osłabło po uwzględnieniu zależności przestrzennej.
+
+Ostatecznie, także reszty z modelu SAR wykazują słabszą autokorelację (Moran I = 0.23), co świadczy o lepszym uchwyceniu struktury danych. Model SAR można uznać za trafniejsze narzędzie analizy regionalnych różnic w zanieczyszczeniu powietrza.
+
+## Model SEM
+
+```{r}
+sem_model <- spautolm(
+  formula = Wskaznik ~ Liczba_pojazdów + Pow_powiatu + Ludność_na_km2 + Drogi,
+  data = Dane_std,
+  listw = lw,  # lub "b" w nowszych wersjach
+  method = "eigen"
+)
+summary(sem_model)
+
+
+res_squared2 <- residuals(sem_model)^2
+moran.test(res_squared2, lw)
+```
+
+Model przestrzenny SAR z istotnym współczynnikiem lambda (0.93, *p* \< 2.2e‑16) potwierdza silną zależność przestrzenną między powiatami – zanieczyszczenie w jednym regionie jest silnie skorelowane z jego otoczeniem. W porównaniu do regresji klasycznej, model ten lepiej dopasowuje się do danych (niższy AIC = 350, wyższy log-likelihood).
+
+Wśród zmiennych objaśniających tylko **ludność na km²** (*p* \< 2e‑16) i w mniejszym stopniu **liczba pojazdów** (*p* ≈ 0.015) wykazują istotny wpływ. Natomiast **powierzchnia powiatu** i **długość dróg** nie są statystycznie znaczące po uwzględnieniu zależności przestrzennych.
+
+Test Morana I wykonany dla reszt modelu SAR wskazuje, że autokorelacja została istotnie zredukowana (*I* = 0.21, *p* \< 0.001), co potwierdza poprawność specyfikacji modelu przestrzennego i jego przewagę nad klasyczną regresją.
+
+## Przestrzenny Model Durbina (SDM)
+
+```{r}
+sdm_model <- lagsarlm(
+  formula = Wskaznik ~ Liczba_pojazdów +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Drogi,
+    data = Dane_std,
+  listw = lw,
+  Durbin = TRUE
+)
+
+summary(sdm_model)
+
+res_squared3 <- residuals(sdm_model)^2
+moran.test(res_squared3, lw)
+```
+
+Model SAR z komponentem Durbin (efekty sąsiedztwa w zmiennych niezależnych) charakteryzuje się bardzo dobrym dopasowaniem (AIC = 322, log-likelihood = –150), znacznie lepszym niż klasyczna regresja liniowa (AIC = 667). Współczynnik rho = 0.84 (istotny przy *p* \< 2.2e-16) potwierdza silną autokorelację przestrzenną w poziomie zanieczyszczenia.
+
+Najważniejsze obserwacje:
+
+-   **Ludność na km²** pozostaje silnie i istotnie dodatnio związana z poziomem zanieczyszczenia (*p* \< 2e-16),
+
+-   Efekty przestrzenne (sąsiedztwa) są istotne w przypadku:
+
+    -   **Lag.Pow_powiatu** (*p* = 0.037) – większe sąsiednie powiaty obniżają zanieczyszczenie,
+
+    -   **Lag.Ludność_na_km²** (*p* = 0.002) – otoczenie o dużej gęstości ludności zwiększa zanieczyszczenie,
+
+    -   **Lag.Drogi** (*p* = 0.020) – wpływ infrastruktury sąsiadujących powiatów także jest pozytywny.
+
+Model Durbin lepiej oddaje złożoną zależność przestrzenną, gdzie nie tylko lokalne, ale też sąsiednie warunki mają wpływ na jakość powietrza. Test Morana I dla reszt wskazuje, że choć pewna autokorelacja pozostaje (*I* ≈ 0.22), to została znacznie zredukowana względem modelu klasycznego.
+
+## Model SLX (Spatial Lag of X)
+
+```{r}
+slx_model <- lmSLX(
+  formula = Wskaznik ~ Liczba_pojazdów +
+    Pow_powiatu +
+    Ludność_na_km2 +
+    Drogi,
+  data = Dane_std,
+  listw = lw
+)
+
+summary(slx_model)
+
+res_squared4 <- residuals(slx_model)^2
+moran.test(res_squared4, lw)
+```
+
+Model regresji z efektami sąsiedztwa (zmienne opóźnione przestrzennie) i wagami dostarcza mocnych dowodów na istotność zarówno lokalnych, jak i otaczających czynników. Istotność przestrzenna została potwierdzona przez test Morana I dla reszt (*I* ≈ 0.41, *p* \< 2.2e-16), co sugeruje, że mimo zastosowanych wag, zależności przestrzenne nadal są silne.
+
+Wnioski z modelu:
+
+-   **Ludność na km²** (lokalnie i w otoczeniu) ma bardzo silny pozytywny wpływ – zagęszczenie ludności silnie wiąże się z wyższym poziomem zanieczyszczenia.
+
+-   **Powierzchnia powiatu** (zarówno lokalna, jak i sąsiedzka) działa w przeciwnym kierunku – większe obszary wiążą się z niższym zanieczyszczeniem.
+
+-   **Lag.Drogi** oraz **lag.Liczba_pojazdów** również są istotne i dodatnie – warunki infrastrukturalne w sąsiedztwie powiatu wzmacniają efekt zanieczyszczenia.
+
+Model podkreśla znaczenie **rozszerzonego otoczenia terytorialnego** – jakość powietrza zależy nie tylko od warunków w danym powiecie, ale również od tego, co dzieje się w jego sąsiedztwie.
+
+# Wnioski
+
+Przeprowadzona analiza potwierdziła, że zanieczyszczenie powietrza w Polsce ma wyraźny charakter przestrzenny – wartości wskaźnika są silnie powiązane nie tylko z cechami danego powiatu, ale także z sytuacją w jego otoczeniu. Najlepsze dopasowanie uzyskano w modelu SDM (Spatial Durbin Model), który uwzględnia zarówno lokalne predyktory, jak i efekt sąsiedztwa (zmienne opóźnione przestrzennie).
+
+Za najważniejszy czynnik uznano gęstość zaludnienia, która lokalnie znacząco zwiększa poziom zanieczyszczenia, a jednocześnie – w przypadku sąsiednich powiatów – może działać hamująco. Uwagę zwracają również istotne przestrzenne efekty infrastruktury (drogi) i powierzchni jednostek terytorialnych. Klasyczny model regresji (OLS) nie uwzględnia tych zależności i prowadzi do błędnych wniosków – co potwierdzają silnie skorelowane reszty (Moran I ≈ 0.73).
+
+W kontekście polityki publicznej oznacza to, że skuteczna strategia poprawy jakości powietrza powinna być koordynowana regionalnie, a nie ograniczać się do pojedynczych powiatów. Działania inwestycyjne i planistyczne powinny być planowane z uwzględnieniem danych z otoczenia, np. przez współpracę między powiatami w ramach subregionów funkcjonalnych.
+
+Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. W przyszłości warto zastosować podejścia takie jak GWR i pozyskać dane czasowe, aby lepiej zrozumieć dynamikę zanieczyszczenia i jego uwarunkowania.
