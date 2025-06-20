@@ -592,3 +592,35 @@ Za najważniejszy czynnik uznano gęstość zaludnienia, która lokalnie znaczą
 W kontekście polityki publicznej oznacza to, że skuteczna strategia poprawy jakości powietrza powinna być koordynowana regionalnie, a nie ograniczać się do pojedynczych powiatów. Działania inwestycyjne i planistyczne powinny być planowane z uwzględnieniem danych z otoczenia, np. przez współpracę między powiatami w ramach subregionów funkcjonalnych.
 
 Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. W przyszłości warto zastosować podejścia takie jak GWR i pozyskać dane czasowe, aby lepiej zrozumieć dynamikę zanieczyszczenia i jego uwarunkowania.
+
+# Bibliografia
+
+Abhijith, K. V., Kumar, P., Gallagher, J., McNabola, A., Baldauf, R., Pilla, F., ... & Pulvirenti, B. (2017). Air pollution abatement performances of green infrastructure in open road and built-up street canyon environments–A review. Atmospheric Environment, 162, 71-86.
+
+Balun, M., Białoskórska, U., Bruszewski, H., Burzyński, J., Błaszczyk, J., Cenowski, M., ... & Hławiczka, S. (2011). Analiza stanu zanieczyszczenia powietrza pyłem PM10 i PM2,5 z uwzględnieniem składu chemicznego pyłu oraz wpływu źródeł naturalnych—Raport końcowy. Instytut Podstaw Inżynierii Środowiska PAN.
+
+Chen, L., Liu, C., Zhang, L., Zou, R., & Zhang, Z. (2023). The impact of greenspace on air pollution: Empirical evidence from China. Ecological Indicators, 146, 109881.
+
+Cheng, Z., Pang, M. S., & Pavlou, P. A. (2020). Mitigating traffic congestion: The role of intelligent transportation systems. Information Systems Research, 31(3), 653-674.
+
+Elhorst, J. P. (2014). Spatial econometrics: From cross-sectional data to spatial panels. Springer.
+
+Feng, T., Du, H., Lin, Z., & Zuo, J. (2020). Spatial spillover effects of environmental regulations on air pollution: Evidence from urban agglomerations in China. Journal of Environmental Management, 272, 110998.
+
+Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons.
+
+Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
+
+Kumar, P., Druckman, A., Gallagher, J., Gatersleben, B., Allison, S., Eisenman, T. S., ... & Morawska, L. (2024). Reassessing the role of urban green space in air pollution control. Proceedings of the National Academy of Sciences, 121(3), e2306200121.
+
+Lou, C. R., Liu, H. Y., Li, Y. F., & Li, Y. L. (2021). Socioeconomic drivers of PM2.5 in the accumulation phase of air pollution: A regional analysis of 254 Chinese cities. International Journal of Environmental Research and Public Health, 18(17), 9019.
+
+Lu, D., Xu, J., Yang, D., & Zhao, J. (2014). Spatio-temporal variation and influence factors of PM2.5 concentrations in China from 1998 to 2014. Atmospheric Pollution Research, 8(6), 1151-1159.
+
+Maciejewska, M. (2020). Short-term impact of PM2.5, PM10, and PMc on mortality and morbidity in the agglomeration of Warsaw, Poland. Air Quality, Atmosphere & Health, 13(6), 659-672.
+
+Wang, Y., Huang, B., & Yang, L. (2019). A geographically and temporally weighted regression model for spatial downscaling of MODIS land surface temperatures over urban heterogeneous regions. IEEE Transactions on Geoscience and Remote Sensing, 57(7), 5012-5027.
+
+Zhang, X., You, C., & Chen, S. (2024). Road traffic infrastructure construction and air pollution based on the perspective of spatial spillover. Sustainability, 16(21), 9627.
+
+Zhou, Q., Wang, C., & Fang, S. (2019). Application of geographically weighted regression (GWR) in the analysis of the cause of haze pollution in China. Atmospheric Pollution Research, 10(3), 835-846.
