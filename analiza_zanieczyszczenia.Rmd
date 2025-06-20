@@ -177,7 +177,45 @@ Dane opisowe dla ośmiu zmiennych ilościowych wskazują na wyraźne zróżnicow
 -   Długość dróg również cechuje się pozytywną asymetrią (1,99), co może wynikać z koncentracji infrastruktury w niektórych regionach.
 
 Podsumowując, większość zmiennych wykazuje silną asymetrię prawostronną oraz duże zróżnicowanie, co należy uwzględnić przy doborze metod statystycznych oraz interpretacji wyników regresji czy analiz przestrzennych.
+# Wyjaśnienie zmiennej objaśnianej i zmiennych objaśniających
+## Zmienna objaśniana
+Wskaźnik zanieczyszczenia powietrza
 
+Zmienna objaśniana w analizowanym modelu stanowi syntetyczny wskaźnik zanieczyszczenia powietrza, będący sumą czterech kluczowych składowych charakteryzujących jakość powietrza w poszczególnych powiatach Polski:
+
+PM10 - średnia roczna koncentracja pyłu zawieszonego o średnicy aerodynamicznej do 10 μm
+
+PM10 36 maksimum - 36. maksymalna dobowa koncentracja PM10 w roku
+
+PM2,5 - średnia roczna koncentracja pyłu zawieszonego o średnicy aerodynamicznej do 2,5 μm
+
+BaP - średnia roczna koncentracja benzo(a)pirenu
+
+Zgodnie z badaniami Balun et al. (2011), stosunek PM2,5 do PM10 wynosi średnio 0,72, a w sezonie grzewczym wzrasta do 0,77, co wskazuje na dominującą rolę drobnego pyłu w strukturze zanieczyszczeń, przy czym obserwowane efekty zdrowotne PM10 są w dużej mierze spowodowane przez PM2,5, które stanowi dominującą część PM10, szczególnie w sezonie grzewczym. Wysokie poziomy PM10 (powyżej 50 μg/m³) korelują z podwyższonymi stężeniami benzo(a)pirenu, który jest uznawany za jeden z najbardziej przekraczanych standardów jakości powietrza w Polsce(Balun et al., 2011).
+
+## Zmienne objaśniające
+
+**Liczba pojazdów samochodowych**
+
+Transport drogowy stanowi jedno z głównych źródeł zanieczyszczenia powietrza w obszarach miejskich. Badania prowadzone w polskich miastach wykazały, że bliskość głównych arterii komunikacyjnych istotnie wpływa na zwiększoną ekspozycję na PM2,5 i PM10. Holnicki et al. (2018) wykazali, że w Warszawie lokalne emisje przyczyniają się do około 1600 przedwczesnych zgonów rocznie oraz 29 000 utraconych lat życia skorygowanych niepełnosprawnością (DALY), przy czym 80% tego obciążenia zdrowotnego wynika z ekspozycji na PM2,5. Maciejewska (2020) podaje, że krótkoterminowa ekspozycja na zwiększone o 10 μg/m³ stężenia PM2,5 i PM10 powoduje wzrost ryzyka względnego zgonu odpowiednio o 0,7% i 0,3%.
+
+**Udział terenów zieleni i powierzchnia gruntów leśnych**
+
+Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy.
+Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic obserwuje się negatywną korelację między pokryciem roślinnością a stężeniami NO2, podczas gdy wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
+
+**Średnie wynagrodzenie**
+
+Poziom dochodów wykazuje silną negatywną korelację z poziomem zanieczyszczenia powietrza, przy czym efekt ten charakteryzuje się znaczącymi korzyściami skali. Lou et al. (2021) w badaniach przeprowadzonych w miastach chińskich wykazali, że współczynnik wpływu dochodów na PM2,5 dla 15 najbogatszych miast wynosił -0,783, będąc około 10-krotnie większym niż dla pełnej próby 254 miast (-0,074). Sugeruje to, że wyższe dochody umożliwiają inwestycje w czystsze technologie, lepszą infrastrukturę oraz relokację działalności przemysłowej poza centra miast.
+
+**Długość dróg o nawierzchni twardej**
+
+Infrastruktura drogowa wykazuje dwukierunkowy wpływ na jakość powietrza. Zhang et al. (2024) wskazują, że rozbudowa sieci dróg może prowadzić do redukcji zanieczyszczeń poprzez zmniejszenie zatorów komunikacyjnych, poprawę płynności ruchu i skrócenie czasu postoju pojazdów, co bezpośrednio przekłada się na niższe emisje szkodliwych substancji takich jak dwutlenek węgla, tlenki azotu i cząstki stałe. Cheng et al. (2020) podkreślają, że poprawa infrastruktury drogowej w miastach może również promować rozwój transportu publicznego, oferując bardziej efektywne, niskoemisyjne alternatywy.
+Z drugiej strony, zgodnie z paradoksem Braessa, zwiększenie przepustowości dróg może indukować większy ruch samochodowy. Zhang et al. (2024) zwracają uwagę na przestrzenne efekty spillover - poprawa infrastruktury w jednym regionie może redukować zanieczyszczenie w regionach sąsiednich poprzez usprawnienie przepływów międzyregionalnych, przy czym efekty spillover są większe niż efekty bezpośrednie, co podkreśla znaczenie międzymiastowych zatorów komunikacyjnych w zanieczyszczeniu powietrza.
+
+**Powierzchnia powiatu**
+
+Większa powierzchnia powiatu może wpływać na rozproszenie źródeł emisji oraz zwiększać zdolność naturalnej dyspersji zanieczyszczeń. Jednocześnie rozleglejsze powiaty mogą charakteryzować się mniejszą gęstością zabudowy i większym udziałem terenów niezurbanizowanych, co sprzyja lepszej jakości powietrza.
 # Analiza korelacji
 
 ```{r}
@@ -553,11 +591,11 @@ Najważniejsze obserwacje:
 
 Model Durbin lepiej oddaje złożoną zależność przestrzenną, gdzie nie tylko lokalne, ale też sąsiednie warunki mają wpływ na jakość powietrza. Test Morana I dla reszt wskazuje, że choć pewna autokorelacja pozostaje (*I* ≈ 0.22), to została znacznie zredukowana względem modelu klasycznego.
 
-## Podsumowanie
+**Podsumowanie**
 
 Zastosowanie metod ekonometrii przestrzennej w analizie zanieczyszczenia powietrza było uzasadnione charakterem badanego zjawiska. Przeprowadzone testy autokorelacji przestrzennej, w tym test Morana I, potwierdziły istnienie istotnych statystycznie zależności przestrzennych w rozkładzie wskaźnika zanieczyszczeń.
 
-Wykorzystanie różnych specyfikacji modeli przestrzennych (SLX, SEM, SAR, SDM) pozwoliło na kompleksową analizę mechanizmów przestrzennego oddziaływania. Model SLX (Spatial Lag of X) uwzględnia przestrzenne opóźnienia zmiennych objaśniających, co jest szczególnie istotne w kontekście efektów spillover infrastruktury drogowej czy emisji z sąsiednich powiatów. Model SEM (Spatial Error Model) kontroluje przestrzenną autokorelację w składniku losowym, która może wynikać z pominiętych zmiennych o charakterze przestrzennym. Model SAR (Spatial Autoregressive) bezpośrednio modeluje wpływ poziomu zanieczyszczeń w sąsiednich powiatach, co odzwierciedla procesy dyfuzji zanieczyszczeń. Najbardziej kompleksowy model SDM (Spatial Durbin Model) łączy elementy SAR i SLX, umożliwiając jednoczesną analizę efektów bezpośrednich, pośrednich i całkowitych.
+Wykorzystanie różnych specyfikacji modeli przestrzennych (SLX, SEM, SAR, SDM) pozwoliło na kompleksową analizę mechanizmów przestrzennego oddziaływania. Model SLX (Spatial Lag of X) uwzględnia przestrzenne opóźnienia zmiennych objaśniających, co jest szczególnie istotne w kontekście efektów spillover infrastruktury drogowej czy emisji z sąsiednich powiatów (Feng et al., 2020). Model SEM (Spatial Error Model) kontroluje przestrzenną autokorelację w składniku losowym, która może wynikać z pominiętych zmiennych o charakterze przestrzennym. Model SAR (Spatial Autoregressive) bezpośrednio modeluje wpływ poziomu zanieczyszczeń w sąsiednich powiatach, co odzwierciedla procesy dyfuzji zanieczyszczeń. Najbardziej kompleksowy model SDM (Spatial Durbin Model) łączy elementy SAR i SLX, umożliwiając jednoczesną analizę efektów bezpośrednich, pośrednich i całkowitych (Elhorst, 2014).
 
 ## Model SLX (Spatial Lag of X)
 
@@ -597,7 +635,16 @@ Za najważniejszy czynnik uznano gęstość zaludnienia, która lokalnie znaczą
 
 W kontekście polityki publicznej oznacza to, że skuteczna strategia poprawy jakości powietrza powinna być koordynowana regionalnie, a nie ograniczać się do pojedynczych powiatów. Działania inwestycyjne i planistyczne powinny być planowane z uwzględnieniem danych z otoczenia, np. przez współpracę między powiatami w ramach subregionów funkcjonalnych.
 
-Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. W przyszłości warto zastosować podejścia takie jak GWR i pozyskać dane czasowe, aby lepiej zrozumieć dynamikę zanieczyszczenia i jego uwarunkowania.
+Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. 
+
+Geograficznie Ważona Regresja (Geographically Weighted Regression - GWR) stanowi naturalne rozszerzenie przeprowadzonych analiz i powinna być rozważona w kolejnym etapie badań z następujących powodów:
+
+Heterogeniczność przestrzenna: Polska charakteryzuje się znacznym zróżnicowaniem regionalnym pod względem struktury gospodarczej, gęstości zaludnienia i warunków klimatycznych. GWR umożliwi identyfikację lokalnych wzorców determinant zanieczyszczenia powietrza, które mogą różnić się między np. uprzemysłowionym Śląskiem a rolniczymi regionami wschodniej Polski (Zhou et al., 2019).
+
+Nieliniowość relacji przestrzennych: Metoda GWR pozwala na estymację parametrów zmieniających się w przestrzeni, co jest szczególnie istotne dla zmiennych takich jak wpływ terenów zielonych, który może być różny w zależności od lokalnego kontekstu urbanistycznego (Fotheringham et al., 2002).
+
+Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza.
+Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
 
 # Bibliografia
 
