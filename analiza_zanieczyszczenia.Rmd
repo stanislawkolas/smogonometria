@@ -73,7 +73,7 @@ Transport drogowy stanowi jedno z głównych źródeł zanieczyszczenia powietrz
 **Udział terenów zieleni i powierzchnia gruntów leśnych**
 
 Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy.
-Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic obserwuje się negatywną korelację między pokryciem roślinnością a stężeniami NO2, podczas gdy wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
+Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
 
 **Średnie wynagrodzenie**
 
@@ -649,7 +649,7 @@ Nieliniowość relacji przestrzennych: Metoda GWR pozwala na estymację parametr
 Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza.
 Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
 
-# Bibliografia
+#Bibliografia
 
 Abhijith, K. V., Kumar, P., Gallagher, J., McNabola, A., Baldauf, R., Pilla, F., ... & Pulvirenti, B. (2017). Air pollution abatement performances of green infrastructure in open road and built-up street canyon environments–A review. Atmospheric Environment, 162, 71-86.
 
@@ -664,7 +664,6 @@ Elhorst, J. P. (2014). Spatial econometrics: From cross-sectional data to spatia
 Feng, T., Du, H., Lin, Z., & Zuo, J. (2020). Spatial spillover effects of environmental regulations on air pollution: Evidence from urban agglomerations in China. Journal of Environmental Management, 272, 110998.
 
 Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons.
-
 Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
 
 Kumar, P., Druckman, A., Gallagher, J., Gatersleben, B., Allison, S., Eisenman, T. S., ... & Morawska, L. (2024). Reassessing the role of urban green space in air pollution control. Proceedings of the National Academy of Sciences, 121(3), e2306200121.
