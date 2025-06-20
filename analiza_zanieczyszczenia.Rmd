@@ -553,6 +553,12 @@ Najważniejsze obserwacje:
 
 Model Durbin lepiej oddaje złożoną zależność przestrzenną, gdzie nie tylko lokalne, ale też sąsiednie warunki mają wpływ na jakość powietrza. Test Morana I dla reszt wskazuje, że choć pewna autokorelacja pozostaje (*I* ≈ 0.22), to została znacznie zredukowana względem modelu klasycznego.
 
+## Podsumowanie
+
+Zastosowanie metod ekonometrii przestrzennej w analizie zanieczyszczenia powietrza było uzasadnione charakterem badanego zjawiska. Przeprowadzone testy autokorelacji przestrzennej, w tym test Morana I, potwierdziły istnienie istotnych statystycznie zależności przestrzennych w rozkładzie wskaźnika zanieczyszczeń.
+
+Wykorzystanie różnych specyfikacji modeli przestrzennych (SLX, SEM, SAR, SDM) pozwoliło na kompleksową analizę mechanizmów przestrzennego oddziaływania. Model SLX (Spatial Lag of X) uwzględnia przestrzenne opóźnienia zmiennych objaśniających, co jest szczególnie istotne w kontekście efektów spillover infrastruktury drogowej czy emisji z sąsiednich powiatów. Model SEM (Spatial Error Model) kontroluje przestrzenną autokorelację w składniku losowym, która może wynikać z pominiętych zmiennych o charakterze przestrzennym. Model SAR (Spatial Autoregressive) bezpośrednio modeluje wpływ poziomu zanieczyszczeń w sąsiednich powiatach, co odzwierciedla procesy dyfuzji zanieczyszczeń. Najbardziej kompleksowy model SDM (Spatial Durbin Model) łączy elementy SAR i SLX, umożliwiając jednoczesną analizę efektów bezpośrednich, pośrednich i całkowitych.
+
 ## Model SLX (Spatial Lag of X)
 
 ```{r}
