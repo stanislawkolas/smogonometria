@@ -312,6 +312,8 @@ moran.test(res_squared, lw)
 
 # Podsumowanie wyników
 summary(model_ols)
+AIC(model_ols)
+logLik(model_ols)
 
 # Spatial lag model (SAR)
 #Model SAR
@@ -327,9 +329,16 @@ model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
 # Podsumowanie wyników
 summary(model_sar)
 
-
 res_squared1 <- residuals(model_sar)^2
 moran.test(res_squared1, lw)
+
+# Pseudo R2
+fitted_vals <- fitted(model_sar)
+residuals_vals <- residuals(model_sar)
+rss <- sum(residuals_vals^2)
+tss <- sum((mapa_dane_std$Wskaznik - mean(mapa_dane_std$Wskaznik))^2)
+r2_pseudo <- 1 - (rss / tss)
+print(paste("Pseudo R² dla SAR:", round(r2_pseudo, 4)))
 
 #Model SEM
 sem_model <- spautolm(
@@ -340,10 +349,16 @@ sem_model <- spautolm(
 )
 summary(sem_model)
 
-
 res_squared2 <- residuals(sem_model)^2
 moran.test(res_squared2, lw)
 
+# Pseudo R2
+fitted_vals_sem <- fitted(sem_model)
+residuals_sem <- residuals(sem_model)
+rss_sem <- sum(residuals_sem^2)
+tss_sem <- sum((Dane_std$Wskaznik - mean(Dane_std$Wskaznik))^2)
+r2_pseudo_sem <- 1 - (rss_sem / tss_sem)
+print(paste("Pseudo R² dla SEM:", round(r2_pseudo_sem, 4)))
 
 #Przestrzenny Model Durbina (SDM)
 sdm_model <- lagsarlm(
@@ -361,6 +376,13 @@ summary(sdm_model)
 res_squared3 <- residuals(sdm_model)^2
 moran.test(res_squared3, lw)
 
+# Pseudo R2
+fitted_vals_sdm <- fitted(sdm_model)
+residuals_sdm <- residuals(sdm_model)
+rss_sdm <- sum(residuals_sdm^2)
+tss_sdm <- sum((Dane_std$Wskaznik - mean(Dane_std$Wskaznik))^2)
+r2_pseudo_sdm <- 1 - (rss_sdm / tss_sdm)
+print(paste("Pseudo R² dla SDM:", round(r2_pseudo_sdm, 4)))
 
 # Model SLX (Spatial Lag of X)
 slx_model <- lmSLX(
@@ -373,6 +395,16 @@ slx_model <- lmSLX(
 )
 
 summary(slx_model)
+logLik(slx_model)
+AIC(slx_model)
 
 res_squared4 <- residuals(slx_model)^2
 moran.test(res_squared4, lw)
+
+# Pseudo R2
+fitted_vals_slx <- fitted(slx_model)
+residuals_slx <- residuals(slx_model)
+rss_slx <- sum(residuals_slx^2)
+tss_slx <- sum((Dane_std$Wskaznik - mean(Dane_std$Wskaznik))^2)
+r2_pseudo_slx <- 1 - (rss_slx / tss_slx)
+print(paste("Pseudo R² dla SLX:", round(r2_pseudo_slx, 4)))
