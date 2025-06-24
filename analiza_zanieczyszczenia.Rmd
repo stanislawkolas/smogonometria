@@ -1,21 +1,76 @@
 ---
 title: "Analiza zanieczyszczenia powietrza w Polsce"
-author: "Miriam Nieslona, Piotr Geremek, Bartosz Kurzyński, Jakub Kołpaczyński, Stanisław Kolas"
-date: "`r Sys.Date()`"
+author: |
+  Miriam Nieslona,  
+  Piotr Geremek,  
+  Bartosz Kurzyński,  
+  Jakub Kołpaczyński,  
+  Stanisław Kolas
+date: "`r format(Sys.Date(), '%d.%m.%Y')`"
 output:
-  prettydoc::html_pretty:
-    theme: leonids
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    theme: flatly
+    highlight: tango
+    df_print: paged
+lang: pl
 ---
+
+```{=html}
+<style>
+body {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #222;
+  background-color: #fdfdfd;
+  padding: 20px;
+}
+
+h1, h2, h3, h4 {
+  color: #004080;
+}
+
+code {
+  background-color: #f4f9f5;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+pre {
+  background-color: #f8f8f8;
+  padding: 10px;
+  border-left: 4px solid #004080;
+  overflow-x: auto;
+}
+
+table {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 0.5em;
+  border: 1px solid #ccc;
+}
+</style>
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-	message = FALSE,
-	warning = FALSE,
-	include = FALSE
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  include = TRUE
 )
 ```
 
-```{r setup include=FALSE}
+```{r setup2, include=FALSE}
 packages <- c("ggplot2", "dplyr", "tidyverse", "readr", "corrplot", "sf",
               "spatialreg", "spdep", "naniar", "e1071", "standardize", "prettydoc")
 
@@ -151,15 +206,24 @@ Analiza kompletności danych wykazała, że wszystkie zmienne zawarte w zbiorze 
 Dane_num <- Dane %>% 
   select(where(is.numeric)) 
 
-# Rysuj boxploty automatycznie
-for (colname in names(Dane_num)) {
-  print(
-    ggplot(Dane, aes_string(x = "1", y = colname)) +
-      geom_boxplot(fill = "orange", outlier.color = "red", outlier.shape = 8) +
-      labs(title = paste("Boxplot -", colname), y = colname, x = "") +
-      theme_minimal()
-  )
-}
+# Boxplot – Wskaznik (niebieski)
+ggplot(Dane, aes(x = "1", y = Wskaznik)) +
+  geom_boxplot(fill = "steelblue", outlier.color = "red", outlier.shape = 8) +
+  labs(title = "Boxplot - Wskaznik", y = "Wskaznik", x = "") +
+  theme_minimal()
+
+# Boxplot – Grunty leśne (zielonkawy)
+ggplot(Dane, aes(x = "1", y = Grunty_lesne)) +
+  geom_boxplot(fill = "olivedrab", outlier.color = "red", outlier.shape = 8) +
+  labs(title = "Boxplot - Grunty leśne", y = "Grunty leśne", x = "") +
+  theme_minimal()
+
+# Boxplot – Powierzchnia powiatu (fioletowy)
+ggplot(Dane, aes(x = "1", y = Pow_powiatu)) +
+  geom_boxplot(fill = "mediumpurple", outlier.color = "red", outlier.shape = 8) +
+  labs(title = "Boxplot - Powierzchnia powiatu", y = "Powierzchnia powiatu", x = "") +
+  theme_minimal()
+
 ```
 
 ```{r tab, echo=FALSE}
@@ -378,7 +442,6 @@ ggplot(data = mapa_dane) +
   theme_minimal()
 ```
 
-
 ### Kartogramy – interpretacja
 
 -   **Zanieczyszczenie powietrza** w 2023 roku ma zróżnicowane rozmieszczenie, z wyższymi wartościami w południowej Polsce – szczególnie na Śląsku, co może wynikać z gęstej zabudowy i przemysłu.
@@ -396,6 +459,7 @@ Rozkłady te wskazują na potencjalną zależność między środowiskiem, infra
 # Moran I test
 moran.test(Dane$Wskaznik, lw)
 ```
+
 ```{r moran2, echo=FALSE}
 #Moran Plot
 moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
