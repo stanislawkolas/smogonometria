@@ -8,12 +8,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(
+	message = FALSE,
+	warning = FALSE,
+	include = FALSE
+)
 ```
 
-# Instalacja i ładowanie pakietów
-
-```{r}
+```{r setup include=FALSE}
 packages <- c("ggplot2", "dplyr", "tidyverse", "readr", "corrplot", "sf",
               "spatialreg", "spdep", "naniar", "e1071", "standardize", "prettydoc")
 
@@ -50,6 +52,7 @@ W niniejszym raporcie przedstawiono analizę zanieczyszczenia powietrza w Polsce
 # Wyjaśnienie zmiennej objaśnianej i zmiennych objaśniających
 
 ## Zmienna objaśniana
+
 Wskaźnik zanieczyszczenia powietrza
 
 Zmienna objaśniana w analizowanym modelu stanowi syntetyczny wskaźnik zanieczyszczenia powietrza, będący sumą czterech kluczowych składowych charakteryzujących jakość powietrza w poszczególnych powiatach Polski:
@@ -72,8 +75,7 @@ Transport drogowy stanowi jedno z głównych źródeł zanieczyszczenia powietrz
 
 **Udział terenów zieleni i powierzchnia gruntów leśnych**
 
-Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy.
-Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
+Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy. Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
 
 **Średnie wynagrodzenie**
 
@@ -81,24 +83,21 @@ Poziom dochodów wykazuje silną negatywną korelację z poziomem zanieczyszczen
 
 **Długość dróg o nawierzchni twardej**
 
-Infrastruktura drogowa wykazuje dwukierunkowy wpływ na jakość powietrza. Zhang et al. (2024) wskazują, że rozbudowa sieci dróg może prowadzić do redukcji zanieczyszczeń poprzez zmniejszenie zatorów komunikacyjnych, poprawę płynności ruchu i skrócenie czasu postoju pojazdów, co bezpośrednio przekłada się na niższe emisje szkodliwych substancji takich jak dwutlenek węgla, tlenki azotu i cząstki stałe. Cheng et al. (2020) podkreślają, że poprawa infrastruktury drogowej w miastach może również promować rozwój transportu publicznego, oferując bardziej efektywne, niskoemisyjne alternatywy.
-Z drugiej strony, zgodnie z paradoksem Braessa, zwiększenie przepustowości dróg może indukować większy ruch samochodowy. Zhang et al. (2024) zwracają uwagę na przestrzenne efekty spillover - poprawa infrastruktury w jednym regionie może redukować zanieczyszczenie w regionach sąsiednich poprzez usprawnienie przepływów międzyregionalnych, przy czym efekty spillover są większe niż efekty bezpośrednie, co podkreśla znaczenie międzymiastowych zatorów komunikacyjnych w zanieczyszczeniu powietrza.
+Infrastruktura drogowa wykazuje dwukierunkowy wpływ na jakość powietrza. Zhang et al. (2024) wskazują, że rozbudowa sieci dróg może prowadzić do redukcji zanieczyszczeń poprzez zmniejszenie zatorów komunikacyjnych, poprawę płynności ruchu i skrócenie czasu postoju pojazdów, co bezpośrednio przekłada się na niższe emisje szkodliwych substancji takich jak dwutlenek węgla, tlenki azotu i cząstki stałe. Cheng et al. (2020) podkreślają, że poprawa infrastruktury drogowej w miastach może również promować rozwój transportu publicznego, oferując bardziej efektywne, niskoemisyjne alternatywy. Z drugiej strony, zgodnie z paradoksem Braessa, zwiększenie przepustowości dróg może indukować większy ruch samochodowy. Zhang et al. (2024) zwracają uwagę na przestrzenne efekty spillover - poprawa infrastruktury w jednym regionie może redukować zanieczyszczenie w regionach sąsiednich poprzez usprawnienie przepływów międzyregionalnych, przy czym efekty spillover są większe niż efekty bezpośrednie, co podkreśla znaczenie międzymiastowych zatorów komunikacyjnych w zanieczyszczeniu powietrza.
 
 **Powierzchnia powiatu**
 
-Większa powierzchnia powiatu może wpływać na rozproszenie źródeł emisji oraz zwiększać zdolność naturalnej dyspersji zanieczyszczeń. Jednocześnie rozleglejsze powiaty mogą charakteryzować się mniejszą gęstością zabudowy i większym udziałem terenów niezurbanizowanych, co sprzyja lepszej jakości powietrza.
-# Analiza korelacji
+Większa powierzchnia powiatu może wpływać na rozproszenie źródeł emisji oraz zwiększać zdolność naturalnej dyspersji zanieczyszczeń. Jednocześnie rozleglejsze powiaty mogą charakteryzować się mniejszą gęstością zabudowy i większym udziałem terenów niezurbanizowanych, co sprzyja lepszej jakości powietrza. \# Analiza korelacji
 
 # Przygotowanie danych
 
-```{r}
+```{r include=FALSE}
 Dane <- read_csv("Dane_zanieczyszczenie.csv")
-View(Dane)
 ```
 
 ## Wczytanie danych i ich przygotowanie
 
-```{r mapa, message=FALSE, warning=FALSE}
+```{r mapa, message=FALSE, warning=FALSE, include=FALSE}
 if (file.exists("counties.shp")) {
   mapa <- st_read("counties.shp")
   mapa <- mapa[order(mapa$JPT_KOD_JE), ]
@@ -113,7 +112,7 @@ Dane <- Dane %>% mutate(across(-Kod_powiat, as.numeric))
 colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów","Gm_tereny_zieleni","Grunty_lesne","Pow_powiatu","Ludność_na_km2","Srednie_wyn","Drogi")
 #Sortowanie danych według kodu powaiatu rosnąco
 Dane <- Dane[order(Dane$Kod_powiat), ]
-
+# Sprawdzenie poprawności wczytania pliku .shp
 colnames(mapa)    # sprawdzenie nazw kolumn w pliku .shp 
 print(mapa$JPT_KOD_JE)   # sprawdzenie kolejności obiektów w pliku .shp
 all.equal(mapa$JPT_KOD_JE, Dane$Kod_powiat)
@@ -125,7 +124,7 @@ Analiza rozpoczęła się od wczytania zbioru danych zawierającego wskaźnik za
 
 # Identyfikacja braków danych
 
-```{r}
+```{r braki, echo=FALSE}
 
 # Podsumowanie braków danych
 summary_na <- sapply(Dane, function(x) sum(is.na(x)))
@@ -147,7 +146,7 @@ Analiza kompletności danych wykazała, że wszystkie zmienne zawarte w zbiorze 
 
 ## Identyfikacja obserwacji odstających (OUTLIERS)
 
-```{r echo=FALSE}
+```{r boxy, echo=FALSE}
 # Wykresy boxplot dla każdej kolumny numerycznej
 Dane_num <- Dane %>% 
   select(where(is.numeric)) 
@@ -161,7 +160,9 @@ for (colname in names(Dane_num)) {
       theme_minimal()
   )
 }
+```
 
+```{r tab, echo=FALSE}
 # Wykrycie obserwacji odstających za pomocą reguły IQR
 outliers_list <- list()
 for (col in names(Dane_num)) {
@@ -182,7 +183,7 @@ Na podstawie analizy zmiennych ilościowych za pomocą reguły IQR (interquartil
 
 # Statystyki opisowe
 
-```{r}
+```{r tab2, echo=FALSE}
 # Wybór kolumn numerycznych
 Dane_num <- Dane %>% select(where(is.numeric))
 
@@ -220,8 +221,7 @@ Dane opisowe dla ośmiu zmiennych ilościowych wskazują na wyraźne zróżnicow
 
 Podsumowując, większość zmiennych wykazuje silną asymetrię prawostronną oraz duże zróżnicowanie, co należy uwzględnić przy doborze metod statystycznych oraz interpretacji wyników regresji czy analiz przestrzennych.
 
-
-```{r}
+```{r kor1, echo=FALSE}
 ##Analiza korelacji między zmiennymi ilościowymi (wszystkimi)
 
 # Wybór kolumn numerycznych
@@ -230,15 +230,14 @@ Dane_num <- Dane %>% select(where(is.numeric))
 # Obliczanie macierzy korelacji (domyślnie metoda Pearsona)
 macierz_korelacji <- cor(Dane_num, use = "complete.obs")
 
-# Wyświetlenie macierzy korelacji
-print(round(macierz_korelacji, 2))
-
 # Wizualizacja korelacji
 corrplot(macierz_korelacji, method = "color", addCoef.col = "black", 
          tl.cex = 0.8, number.cex = 0.7,
          title = "Macierz korelacji zmiennych ilościowych", 
          mar = c(0, 0, 1, 0))
+```
 
+```{r kor2, echo=FALSE}
 # Analiza korelacji między zmiennymi ilościowymi (po dopasowaniu)
 
 # Wybierz tylko kolumny numeryczne
@@ -261,20 +260,18 @@ Wskaźnik zanieczyszczenia powietrza dodatnio koreluje z liczbą pojazdów (r = 
 
 # Wizualizacja danych
 
-## Histogramy tylko dla zmiennych ilościowych
+## Histogram wskaźnika zanieczyszczenia powietrza
 
-```{r}
-Dane_num <- Dane %>% select(where(is.numeric))
-# Histogramy tylko dla zmiennych ilościowych
-for (zm in names(Dane_num)) {
-  print(
-    ggplot(Dane, aes(x = .data[[zm]])) +
-      geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) +
-      labs(title = paste("Histogram -", zm),
-           x = zm, y = "Liczba powiatów") +
-      theme_minimal()
-  )
-}
+```{r hist, echo=FALSE}
+#Histogram zanieczyszczenia powietrza w 2023 roku
+ggplot(Dane, aes(x = Wskaznik)) + 
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) + 
+  labs(
+    title = "Rozkład zanieczyszczenia powietrza w 2023 roku", 
+    x = "Wskaźnik zanieczyszczenia powietrza", 
+    y = "Liczba powiatów"
+  ) +
+  theme_minimal()
 ```
 
 Większość zmiennych wykazuje **silną asymetrię prawostronną**, co oznacza, że znaczna liczba powiatów ma niskie wartości, a tylko nieliczne – bardzo wysokie.
@@ -291,7 +288,7 @@ Większość zmiennych wykazuje **silną asymetrię prawostronną**, co oznacza,
 
 ## Wykresy gęstości dla zmiennych numerycznych
 
-```{r}
+```{r gest, echo=FALSE}
 for (zm in names(Dane_num)) {
   print(
     ggplot(Dane, aes_string(x = zm)) +
@@ -311,7 +308,7 @@ Potwierdzenie podobnego kształtu przez histogramy i wykresy gęstości wzmacnia
 
 ## Wykresy Rozrzutu – relacja względem zmiennej Wskaznik
 
-```{r}
+```{r rozrz, echo=FALSE}
 #Lista zmiennych, które mogą wpływać na zanieczyszczenie
 zmienne_x <- c("Liczba_pojazdów", "Gm_tereny_zieleni", "Grunty_lesne", 
                "Pow_powiatu", "Ludność_na_km2", "Srednie_wyn", "Drogi")
@@ -340,9 +337,9 @@ Z wykresów rozrzutu z linią trendu wynika, że:
 
 Widoczne rozproszenie punktów i obecność wartości odstających wskazują, że relacje te są istotne, ale niejednorodne – wymagają dalszego modelowania, np. regresji wielorakiej lub przestrzennej.
 
-## Kartogramy zmiennych objaśniających
+## Kartogramy wybranych zmiennych objaśniających
 
-```{r}
+```{r kod, include=FALSE}
 colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów",
                     "Gm_tereny_zieleni", "Grunty_lesne", "Pow_powiatu",
                     "Ludność_na_km2", "Srednie_wyn", "Drogi")
@@ -350,7 +347,9 @@ colnames(Dane) <- c("Kod_powiat", "Wskaznik", "Liczba_pojazdów",
 # Upewnij się, że kod powiatu jest typu character
 Dane$Kod_powiat <- as.character(Dane$Kod_powiat)
 mapa$JPT_KOD_JE <- as.character(mapa$JPT_KOD_JE)
+```
 
+```{r kart1, echo=FALSE}
 # Połącz dane
 mapa_dane <- merge(mapa, Dane, by.x = "JPT_KOD_JE", by.y = "Kod_powiat")
 #Kartogram Dróg
@@ -359,34 +358,25 @@ ggplot(data = mapa_dane) +
   scale_fill_gradient(low = "White", high = "blue") +
   labs(title = "Długość dróg utwardzonych w kilometrach w podziale na powiaty") +
   theme_minimal()
+```
 
+```{r karrt2, echo=FALSE}
 #Kartogram Gruntów leśnych
 ggplot(data = mapa_dane) + 
   geom_sf(aes(fill = Grunty_lesne)) +
   scale_fill_gradient(low = "White", high = "green") +
   labs(title = "Powierzchnia gruntów leśnych w hektarach w podziale na powiaty") +
   theme_minimal()
-
-#Histogram zanieczyszczenia powietrza w 2023 roku
-ggplot(Dane, aes(x = Wskaznik)) + 
-  geom_histogram(binwidth = 1, fill = "steelblue", color = "black", alpha = 0.7) + 
-  labs(
-    title = "Rozkład zanieczyszczenia powietrza w 2023 roku", 
-    x = "Wskaźnik zanieczyszczenia powietrza", 
-    y = "Liczba powiatów"
-  ) +
-  theme_minimal()
 ```
 
-## Histogram wskaźnika zanieczyszczenia
-
-```{r}
+```{r hji, echo=FALSE}
 ggplot(data = mapa_dane) + 
   geom_sf(aes(fill = Wskaznik)) +
   scale_fill_gradient(low = "White", high = "red") +
   labs(title = "Wskaznik zanieczyszczenia powietrza w Polsce") +
   theme_minimal()
 ```
+
 
 ### Kartogramy – interpretacja
 
@@ -400,17 +390,21 @@ Rozkłady te wskazują na potencjalną zależność między środowiskiem, infra
 
 # Analiza przestrzenna
 
-```{r}
+```{r moran, echo=TRUE}
 ##Identyfikacja przestrzennych skupisk i obserwacji odstających (hot/cold spots)
 # Moran I test
 moran.test(Dane$Wskaznik, lw)
+```
+```{r moran2, echo=FALSE}
 #Moran Plot
 moran.plot(Dane$Wskaznik, lw, labels = FALSE, pch = 20,
            xlab = "Zanieczyszczenie powietrza", 
            ylab = "Spatial Lag of Income")
 
 local_moran <- localmoran(Dane$Wskaznik, lw)
+```
 
+```{r morankl, echo=FALSE}
 # Obliczenie lokalnych statystyk Morana
 local_moran <- localmoran(mapa_dane$Wskaznik, lw, zero.policy = TRUE)
 
@@ -443,7 +437,7 @@ Wykres Morana (scatterplot) potwierdza ten wynik: dane dobrze układają się wz
 
 ## Mapa klastrów (hot/cold spots)
 
-```{r}
+```{r klas, echo=FALSE}
 ggplot(data = mapa_dane) +
   geom_sf(aes(fill = klaster)) +
   scale_fill_manual(values = c("Hot Spot" = "red",
@@ -465,7 +459,7 @@ Analiza lokalnej autokorelacji przestrzennej (LISA) ujawnia wyraźne **klastry z
 
 Mapa potwierdza istnienie przestrzennych wzorców zanieczyszczenia, które powinny być uwzględniane w politykach regionalnych.
 
-```{r}
+```{r liniowy, echo=TRUE}
 #Pomocniczy model liniowy
 model_stat <- lm(
   Wskaznik ~ Liczba_pojazdów +
@@ -478,11 +472,9 @@ model_stat <- lm(
   data = Dane)
 
 summary(model_stat)
+```
 
-model_best_stat <- step(model_stat, direction = "backward")
-
-summary(model_best_stat)
-
+```{r hhjhk, include=FALSE}
 #standaryzowanie danych
 Dane_std <- Dane %>% mutate(across(where(is.numeric), scale))
 print(Dane_std)
@@ -496,7 +488,9 @@ Oszacowany model regresji tłumaczy około 52% zmienności wskaźnika zanieczysz
 
 # Modelowanie ekonometryczne i ocena modelu
 
-```{r}
+## Model OLS
+
+```{r ols, echo=TRUE}
 # Klasyczny model liniowy OLS
 model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
                   Gm_tereny_zieleni +
@@ -506,13 +500,20 @@ model_ols <- lm(Wskaznik ~ Liczba_pojazdów +
                   Srednie_wyn +
                   Drogi,
                 data = Dane_std)
+# Podsumowanie wyników
+summary(model_ols)
 
 res_squared <- residuals(model_ols)^2
 moran.test(res_squared, lw)
 
-# Podsumowanie wyników
-summary(model_ols)
 
+```
+
+Model OLS wykazuje umiarkowane dopasowanie (R² ≈ 0.52), jednak test Morana I dla reszt (I = 0.34, *p* \< 2.2e‑16) wskazuje na istotną przestrzenną autokorelację, co sugeruje, że klasyczna regresja nie uwzględnia zależności przestrzennych między powiatami. Współczynniki regresji są zgodne z intuicją: większa powierzchnia powiatu i tereny zieleni obniżają zanieczyszczenie, podczas gdy gęstość zaludnienia i liczba pojazdów je zwiększają. Jednakże, brak istotności statystycznej dla wielu zmiennych sugeruje potrzebę zastosowania bardziej zaawansowanego modelowania przestrzennego.
+
+## Model SAR (Spatial Autoregressive Model)
+
+```{r sar, echo=TRUE}
 # Spatial lag model (SAR)
 #Model SAR
 model_sar <- lagsarlm(Wskaznik ~ Liczba_pojazdów +
@@ -539,7 +540,7 @@ Ostatecznie, także reszty z modelu SAR wykazują słabszą autokorelację (Mora
 
 ## Model SEM
 
-```{r}
+```{r sem, echo=TRUE}
 sem_model <- spautolm(
   formula = Wskaznik ~ Liczba_pojazdów + Pow_powiatu + Ludność_na_km2 + Drogi,
   data = Dane_std,
@@ -561,7 +562,7 @@ Test Morana I wykonany dla reszt modelu SAR wskazuje, że autokorelacja została
 
 ## Przestrzenny Model Durbina (SDM)
 
-```{r}
+```{r sdm, echo=TRUE}
 sdm_model <- lagsarlm(
   formula = Wskaznik ~ Liczba_pojazdów +
     Pow_powiatu +
@@ -602,7 +603,7 @@ Wykorzystanie różnych specyfikacji modeli przestrzennych (SLX, SEM, SAR, SDM) 
 
 ## Model SLX (Spatial Lag of X)
 
-```{r}
+```{r slx, echo=TRUE}
 slx_model <- lmSLX(
   formula = Wskaznik ~ Liczba_pojazdów +
     Pow_powiatu +
@@ -638,7 +639,7 @@ Za najważniejszy czynnik uznano gęstość zaludnienia, która lokalnie znaczą
 
 W kontekście polityki publicznej oznacza to, że skuteczna strategia poprawy jakości powietrza powinna być koordynowana regionalnie, a nie ograniczać się do pojedynczych powiatów. Działania inwestycyjne i planistyczne powinny być planowane z uwzględnieniem danych z otoczenia, np. przez współpracę między powiatami w ramach subregionów funkcjonalnych.
 
-Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. 
+Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności.
 
 Geograficznie Ważona Regresja (Geographically Weighted Regression - GWR) stanowi naturalne rozszerzenie przeprowadzonych analiz i powinna być rozważona w kolejnym etapie badań z następujących powodów:
 
@@ -646,10 +647,9 @@ Heterogeniczność przestrzenna: Polska charakteryzuje się znacznym zróżnicow
 
 Nieliniowość relacji przestrzennych: Metoda GWR pozwala na estymację parametrów zmieniających się w przestrzeni, co jest szczególnie istotne dla zmiennych takich jak wpływ terenów zielonych, który może być różny w zależności od lokalnego kontekstu urbanistycznego (Fotheringham et al., 2002).
 
-Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza.
-Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
+Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza. Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
 
-#Bibliografia
+# Bibliografia
 
 Abhijith, K. V., Kumar, P., Gallagher, J., McNabola, A., Baldauf, R., Pilla, F., ... & Pulvirenti, B. (2017). Air pollution abatement performances of green infrastructure in open road and built-up street canyon environments–A review. Atmospheric Environment, 162, 71-86.
 
@@ -663,8 +663,7 @@ Elhorst, J. P. (2014). Spatial econometrics: From cross-sectional data to spatia
 
 Feng, T., Du, H., Lin, Z., & Zuo, J. (2020). Spatial spillover effects of environmental regulations on air pollution: Evidence from urban agglomerations in China. Journal of Environmental Management, 272, 110998.
 
-Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons.
-Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
+Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons. Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
 
 Kumar, P., Druckman, A., Gallagher, J., Gatersleben, B., Allison, S., Eisenman, T. S., ... & Morawska, L. (2024). Reassessing the role of urban green space in air pollution control. Proceedings of the National Academy of Sciences, 121(3), e2306200121.
 
