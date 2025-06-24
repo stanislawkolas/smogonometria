@@ -1,6 +1,6 @@
 ---
 title: "Analiza zanieczyszczenia powietrza w Polsce"
-author: "Twoje Imię"
+author: "Miriam Nieslona, Piotr Geremek, Bartosz Kurzyński, Jakub Kołpaczyński, Stanisław Kolas"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
@@ -50,6 +50,7 @@ W niniejszym raporcie przedstawiono analizę zanieczyszczenia powietrza w Polsce
 # Wyjaśnienie zmiennej objaśnianej i zmiennych objaśniających
 
 ## Zmienna objaśniana
+
 Wskaźnik zanieczyszczenia powietrza
 
 Zmienna objaśniana w analizowanym modelu stanowi syntetyczny wskaźnik zanieczyszczenia powietrza, będący sumą czterech kluczowych składowych charakteryzujących jakość powietrza w poszczególnych powiatach Polski:
@@ -72,8 +73,7 @@ Transport drogowy stanowi jedno z głównych źródeł zanieczyszczenia powietrz
 
 **Udział terenów zieleni i powierzchnia gruntów leśnych**
 
-Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy.
-Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
+Rola roślinności w mitygacji zanieczyszczeń powietrza jest złożona i zależna od kontekstu przestrzennego. Według Chen et al. (2023), rośliny kontrolują zanieczyszczenie powietrza poprzez trzy główne mechanizmy: depozycję cząstek stałych na liściach, degradację lotnych związków organicznych (VOC) w ryzosferze przez mikrobiotę glebową oraz pobieranie gazowych zanieczyszczeń przez aparaty szparkowe podczas fotosyntezy. Kumar et al. (2024) wskazują, że efektywność redukcji zanieczyszczeń przez tereny zielone zależy od skali przestrzennej - na poziomie dzielnic wpływ na PM10 i PM2,5 wzmacnia się wraz ze wzrostem skali przestrzennej od poziomu dzielnicy do miasta. Jednakże, jak zauważają Abhijith et al. (2017), w środowisku kanionów ulicznych drzewa mogą przyczyniać się do pogorszenia jakości powietrza poprzez ograniczenie dyspersji zanieczyszczeń, podczas gdy niska roślinność krzewista poprawia warunki aerosanitarne.
 
 **Średnie wynagrodzenie**
 
@@ -81,13 +81,11 @@ Poziom dochodów wykazuje silną negatywną korelację z poziomem zanieczyszczen
 
 **Długość dróg o nawierzchni twardej**
 
-Infrastruktura drogowa wykazuje dwukierunkowy wpływ na jakość powietrza. Zhang et al. (2024) wskazują, że rozbudowa sieci dróg może prowadzić do redukcji zanieczyszczeń poprzez zmniejszenie zatorów komunikacyjnych, poprawę płynności ruchu i skrócenie czasu postoju pojazdów, co bezpośrednio przekłada się na niższe emisje szkodliwych substancji takich jak dwutlenek węgla, tlenki azotu i cząstki stałe. Cheng et al. (2020) podkreślają, że poprawa infrastruktury drogowej w miastach może również promować rozwój transportu publicznego, oferując bardziej efektywne, niskoemisyjne alternatywy.
-Z drugiej strony, zgodnie z paradoksem Braessa, zwiększenie przepustowości dróg może indukować większy ruch samochodowy. Zhang et al. (2024) zwracają uwagę na przestrzenne efekty spillover - poprawa infrastruktury w jednym regionie może redukować zanieczyszczenie w regionach sąsiednich poprzez usprawnienie przepływów międzyregionalnych, przy czym efekty spillover są większe niż efekty bezpośrednie, co podkreśla znaczenie międzymiastowych zatorów komunikacyjnych w zanieczyszczeniu powietrza.
+Infrastruktura drogowa wykazuje dwukierunkowy wpływ na jakość powietrza. Zhang et al. (2024) wskazują, że rozbudowa sieci dróg może prowadzić do redukcji zanieczyszczeń poprzez zmniejszenie zatorów komunikacyjnych, poprawę płynności ruchu i skrócenie czasu postoju pojazdów, co bezpośrednio przekłada się na niższe emisje szkodliwych substancji takich jak dwutlenek węgla, tlenki azotu i cząstki stałe. Cheng et al. (2020) podkreślają, że poprawa infrastruktury drogowej w miastach może również promować rozwój transportu publicznego, oferując bardziej efektywne, niskoemisyjne alternatywy. Z drugiej strony, zgodnie z paradoksem Braessa, zwiększenie przepustowości dróg może indukować większy ruch samochodowy. Zhang et al. (2024) zwracają uwagę na przestrzenne efekty spillover - poprawa infrastruktury w jednym regionie może redukować zanieczyszczenie w regionach sąsiednich poprzez usprawnienie przepływów międzyregionalnych, przy czym efekty spillover są większe niż efekty bezpośrednie, co podkreśla znaczenie międzymiastowych zatorów komunikacyjnych w zanieczyszczeniu powietrza.
 
 **Powierzchnia powiatu**
 
-Większa powierzchnia powiatu może wpływać na rozproszenie źródeł emisji oraz zwiększać zdolność naturalnej dyspersji zanieczyszczeń. Jednocześnie rozleglejsze powiaty mogą charakteryzować się mniejszą gęstością zabudowy i większym udziałem terenów niezurbanizowanych, co sprzyja lepszej jakości powietrza.
-# Analiza korelacji
+Większa powierzchnia powiatu może wpływać na rozproszenie źródeł emisji oraz zwiększać zdolność naturalnej dyspersji zanieczyszczeń. Jednocześnie rozleglejsze powiaty mogą charakteryzować się mniejszą gęstością zabudowy i większym udziałem terenów niezurbanizowanych, co sprzyja lepszej jakości powietrza. \# Analiza korelacji
 
 # Przygotowanie danych
 
@@ -219,7 +217,6 @@ Dane opisowe dla ośmiu zmiennych ilościowych wskazują na wyraźne zróżnicow
 -   Długość dróg również cechuje się pozytywną asymetrią (1,99), co może wynikać z koncentracji infrastruktury w niektórych regionach.
 
 Podsumowując, większość zmiennych wykazuje silną asymetrię prawostronną oraz duże zróżnicowanie, co należy uwzględnić przy doborze metod statystycznych oraz interpretacji wyników regresji czy analiz przestrzennych.
-
 
 ```{r}
 ##Analiza korelacji między zmiennymi ilościowymi (wszystkimi)
@@ -638,7 +635,7 @@ Za najważniejszy czynnik uznano gęstość zaludnienia, która lokalnie znaczą
 
 W kontekście polityki publicznej oznacza to, że skuteczna strategia poprawy jakości powietrza powinna być koordynowana regionalnie, a nie ograniczać się do pojedynczych powiatów. Działania inwestycyjne i planistyczne powinny być planowane z uwzględnieniem danych z otoczenia, np. przez współpracę między powiatami w ramach subregionów funkcjonalnych.
 
-Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności. 
+Należy jednak pamiętać o ograniczeniach: dane są przekrojowe, zagregowane i mogą zawierać uproszczenia. Choć model SDM dobrze odwzorowuje zależności przestrzenne, nie uwzględnia nieliniowości czy lokalnych wariantów zależności.
 
 Geograficznie Ważona Regresja (Geographically Weighted Regression - GWR) stanowi naturalne rozszerzenie przeprowadzonych analiz i powinna być rozważona w kolejnym etapie badań z następujących powodów:
 
@@ -646,8 +643,7 @@ Heterogeniczność przestrzenna: Polska charakteryzuje się znacznym zróżnicow
 
 Nieliniowość relacji przestrzennych: Metoda GWR pozwala na estymację parametrów zmieniających się w przestrzeni, co jest szczególnie istotne dla zmiennych takich jak wpływ terenów zielonych, który może być różny w zależności od lokalnego kontekstu urbanistycznego (Fotheringham et al., 2002).
 
-Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza.
-Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
+Wsparcie polityki regionalnej: Lokalne oszacowania parametrów dostarczą bardziej precyzyjnych informacji dla decydentów na poziomie powiatowym i wojewódzkim, umożliwiając dostosowanie strategii redukcji zanieczyszczeń do specyfiki danego regionu. Jak wykazali Lu et al. (2014), dopasowanie modelu GWR (mierzone R²) jest znacznie lepsze niż klasycznej regresji OLS dla analiz zanieczyszczeń powietrza. Komplementarność z modelami globalnymi: GWR nie zastępuje, lecz uzupełnia globalne modele przestrzenne, dostarczając informacji o lokalnych odchyleniach od średnich efektów oszacowanych w modelach SAR czy SDM (Wang et al., 2019).
 
 #Bibliografia
 
@@ -663,8 +659,7 @@ Elhorst, J. P. (2014). Spatial econometrics: From cross-sectional data to spatia
 
 Feng, T., Du, H., Lin, Z., & Zuo, J. (2020). Spatial spillover effects of environmental regulations on air pollution: Evidence from urban agglomerations in China. Journal of Environmental Management, 272, 110998.
 
-Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons.
-Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
+Fotheringham, A. S., Brunsdon, C., & Charlton, M. (2002). Geographically weighted regression: The analysis of spatially varying relationships. John Wiley & Sons. Holnicki, P., Tainio, M., Kałuszko, A., & Nahorski, Z. (2018). Burden of disease due to air pollution in Warsaw, Poland. International Journal of Environmental Research and Public Health, 15(9), 1-16.
 
 Kumar, P., Druckman, A., Gallagher, J., Gatersleben, B., Allison, S., Eisenman, T. S., ... & Morawska, L. (2024). Reassessing the role of urban green space in air pollution control. Proceedings of the National Academy of Sciences, 121(3), e2306200121.
 
