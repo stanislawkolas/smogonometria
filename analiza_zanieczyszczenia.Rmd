@@ -1,6 +1,6 @@
 ---
 title: "Analiza zanieczyszczenia powietrza w Polsce"
-author: "Twoje Imię"
+author: "Miriam Nieslona, Piotr Geremek, Bartosz Kurzyński, Jakub Kołpaczyński, Stanisław Kolas"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
@@ -222,6 +222,7 @@ Dane opisowe dla ośmiu zmiennych ilościowych wskazują na wyraźne zróżnicow
 Podsumowując, większość zmiennych wykazuje silną asymetrię prawostronną oraz duże zróżnicowanie, co należy uwzględnić przy doborze metod statystycznych oraz interpretacji wyników regresji czy analiz przestrzennych.
 
 ```{r kor1, echo=FALSE}
+
 ##Analiza korelacji między zmiennymi ilościowymi (wszystkimi)
 
 # Wybór kolumn numerycznych
