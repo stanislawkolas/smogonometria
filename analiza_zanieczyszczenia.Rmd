@@ -104,6 +104,20 @@ library(prettydoc)
 
 W niniejszym raporcie przedstawiono analizę zanieczyszczenia powietrza w Polsce z wykorzystaniem danych przestrzennych oraz narzędzi statystycznych w języku R.
 
+## Problem badawczy
+
+1.  Jakie czynniki społeczno-ekonomiczne i przestrzenne wpływają na poziom zanieczyszczenia powietrza w polskich powiatach?
+
+2.  Czy zanieczyszczenie powietrza wykazuje przestrzenną autokorelację, tworząc klastry wysokich i niskich wartości?
+
+3.  Jakie modele ekonometryczne najlepiej opisują przestrzenne zależności w zanieczyszczeniu powietrza?
+
+## Uzasadnienie wyboru:
+
+-   Zanieczyszczenie powietrza to główny problem zdrowia publicznego w Polsce
+-   Konieczność koordynacji polityk regionalnych
+-   Przestrzenny charakter zjawiska wymaga specjalistycznych metod analizy
+
 # Wyjaśnienie zmiennej objaśnianej i zmiennych objaśniających
 
 ## Zmienna objaśniana
