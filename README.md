@@ -16,13 +16,13 @@ The workflow is fully reproducible in **R Markdown**, with export options to **P
 
 ## 📂 Repository Structure
 
-├── analiza_zanieczyszczenia.Rmd    # Main R Markdown analysis script
-├── analiza_zanieczyszczenia.tex    # LaTeX output
-├── analiza_zanieczyszczenia.log    # LaTeX compilation log
-├── Dane_zanieczyszczenie.csv       # Air pollution dataset (county level)
-├── Gęstość zaludnienia.xlsx        # Population density data
-├── drogi i transport-…zip        # Transport & road infrastructure data
-└── img/                            # Folder with generated plots and maps
+- analiza_zanieczyszczenia.Rmd    # Main R Markdown analysis script
+- analiza_zanieczyszczenia.tex    # LaTeX output
+- analiza_zanieczyszczenia.log    # LaTeX compilation log
+- Dane_zanieczyszczenie.csv       # Air pollution dataset (county level)
+- Gęstość zaludnienia.xlsx        # Population density data
+- drogi i transport-…zip        # Transport & road infrastructure data
+- img/                            # Folder with generated plots and maps
 
 ---
 
@@ -54,39 +54,6 @@ The workflow is fully reproducible in **R Markdown**, with export options to **P
 ## ⚙️ Requirements
 - **R** ≥ 4.0.0  
 - **RStudio** (recommended for `.Rmd` workflows)  
-- Required packages:
-```r
-install.packages(c(
-  "tidyverse", "sf", "spdep", "rgdal", "readxl",
-  "tmap", "ggplot2", "dplyr", "car", "spatialreg"
-))
-
-## 📊 Data Sources
-1. **Air pollution levels** – annual average pollutant concentrations at county level  
-2. **Population density** – demographic data by county  
-3. **Transport infrastructure** – road length, traffic intensity, etc.
-
-**Sources:** Statistics Poland (GUS), Chief Inspectorate of Environmental Protection (GIOŚ), Eurostat
-
----
-
-## 📈 Example Results
-- Spatial Distribution of Air Pollution
-- Local Indicators of Spatial Association (LISA)
-- Spatial Autocorrelation Diagnostics
-- Model Output Summary
-
-## 🧠 Interpretation Highlights
-- Clear regional clustering of high and low pollution values
-- Significant positive spatial autocorrelation (Moran’s I)
-- SAR and SDM models outperform OLS, indicating spatial dependence is critical
-- Transport infrastructure and population density show strong correlation with pollution levels
-
----
-
-## ⚙️ Requirements
-- **R** ≥ 4.0.0  
-- **RStudio** (recommended)  
 - Required packages:
 ```r
 install.packages(c(
