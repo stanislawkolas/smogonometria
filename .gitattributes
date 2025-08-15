@@ -1,0 +1,10 @@
+*.html linguist-generated
+*.tex linguist-generated
+*.log linguist-generated
+*.zip linguist-generated
+
+*.R linguist-language=R
+*.Rmd linguist-language=R
+*.Rproj linguist-language=R
+
+* linguist-language=R
