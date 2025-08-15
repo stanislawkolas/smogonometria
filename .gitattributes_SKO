@@ -6,3 +6,5 @@
 *.R linguist-language=R
 *.Rmd linguist-language=R
 *.Rproj linguist-language=R
+
+* linguist-language=R
